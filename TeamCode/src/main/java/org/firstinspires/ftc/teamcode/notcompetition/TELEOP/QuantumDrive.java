@@ -1,4 +1,7 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.notcompetition.TELEOP;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -32,12 +35,17 @@ public class QuantumDrive extends LinearOpMode {
         arm1Servo.setPwmRange(pwmRange);
         arm0Servo.setPwmRange(pwmRange);
 
+        int lastPos1 = 0;
+        int lastPos2 = 0;
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         armLift1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armLift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armLift2.setDirection(DcMotorSimple.Direction.REVERSE);
+        armLift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         waitForStart();
 
         if (isStopRequested()) return;
@@ -56,19 +64,14 @@ public class QuantumDrive extends LinearOpMode {
 
         // armLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armLift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
         armLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
         // Main loop: run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            // double y = gamepad1.left_stick_y;
             double y = gamepad1.left_stick_y;
             double x = -gamepad1.left_stick_x * 1.1;
             double rx = -gamepad1.right_stick_x;
@@ -123,34 +126,38 @@ public class QuantumDrive extends LinearOpMode {
                 liftUpLServo.setPosition(currentLiftPosL-0.01);
             }
 
-            if (liftIn) {
-                // Get current position and set it as the target
-                int currentPosition1 = armLift1.getCurrentPosition();
-                armLift1.setTargetPosition(currentPosition1 + 200); // Move up by 50 ticks
+            int armLift1CurrentPosition = armLift1.getCurrentPosition();
+            int armLift2CurrentPosition = armLift2.getCurrentPosition();
+            if (liftOut) {
+                armLift1.setTargetPosition(min(armLift1CurrentPosition - 50,-1600));
                 armLift1.setPower(1);
-                int currentPosition2 = armLift2.getCurrentPosition();
-                armLift2.setTargetPosition(currentPosition2 + 200); // Move up by 50 ticks
+                armLift2.setTargetPosition(min(armLift2CurrentPosition - 50,-1600));
                 armLift2.setPower(1);
-            } else if (liftOut) {
-                // Get current position and set it as the target
-                int currentPosition1 = armLift1.getCurrentPosition();
-                armLift1.setTargetPosition(currentPosition1 - 200); // Move down by 50 ticks
+                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lastPos1 = armLift1CurrentPosition;
+                lastPos2 = armLift2CurrentPosition;
+            } else if (liftIn) {
+                armLift1.setTargetPosition(max(armLift1CurrentPosition + 50, 0)); // Initial position is 0
                 armLift1.setPower(1);
-                int currentPosition2 = armLift2.getCurrentPosition();
-                armLift2.setTargetPosition(currentPosition2 - 200); // Move down by 50 ticks
+                armLift2.setTargetPosition(max(armLift2CurrentPosition + 50, 0)); // Initial position is 0
                 armLift2.setPower(1);
-            }else{
-                int currentPosition1 = armLift1.getCurrentPosition();
-                armLift1.setTargetPosition(currentPosition1); // Move down by 50 ticks
-                armLift1.setPower(0.3);
-                int currentPosition2 = armLift2.getCurrentPosition();
-                armLift2.setTargetPosition(currentPosition2); // Move down by 50 ticks
-                armLift2.setPower(0.3);
+                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lastPos1 = armLift1CurrentPosition;
+                lastPos2 = armLift2CurrentPosition;
+            } else {
+                // Hold position when button is not pressed
+                armLift1.setTargetPosition(lastPos1);
+                armLift1.setPower(0.3); // Reduced power for holding
+                armLift2.setTargetPosition(lastPos2);
+                armLift2.setPower(0.3); // Reduced power for holding
+                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
 
             if (Math.abs(y) < deadzone && Math.abs(x) < deadzone && Math.abs(rx) < deadzone) {
                 // Set target powers to 0 to stop motors immediately
-
                 frontLeftTargetPower = 0;
                 backLeftTargetPower = 0;
                 frontRightTargetPower = 0;
@@ -161,7 +168,7 @@ public class QuantumDrive extends LinearOpMode {
                 backRightMotor.setPower(0);
             } else {
                 // Calculate target powers based on gamepad input
-                double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                double denominator = max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
                 frontLeftTargetPower = 1.1*(y + x + rx) / denominator;
                 backLeftTargetPower = (y - x + rx) / denominator;
                 frontRightTargetPower = 1.1*(y - x - rx) / denominator;
