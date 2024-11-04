@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.notcompetition.TELEOP;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
-@TeleOp(name = "QuantumDrive")
-public class QuantumDrive extends LinearOpMode {
+@TeleOp(name = "QuantumDriveDualGamepad")
+public class QuantumDriveDualGamepad extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("leftFront");
@@ -73,39 +73,39 @@ public class QuantumDrive extends LinearOpMode {
             double x = -gamepad1.left_stick_x * 1.1;
             double rx = -gamepad1.right_stick_x;
             // dn
-            boolean liftOut = gamepad1.left_bumper;
-            boolean liftIn = gamepad1.left_trigger > 0.1;
-            boolean liftUp = gamepad1.right_bumper;
-            boolean liftDown = gamepad1.right_trigger > 0.1;
+            boolean liftOut = gamepad2.left_bumper;
+            boolean liftIn = gamepad2.left_trigger > 0.1;
+            boolean liftUp = gamepad2.right_bumper;
+            boolean liftDown = gamepad2.right_trigger > 0.1;
 
-            if (gamepad1.dpad_up) {
+            if (gamepad2.dpad_up) {
                 double currentArm0Pos = arm0Servo.getPosition();
                 arm0Servo.setPosition(currentArm0Pos+0.01);
-            } else if (gamepad1.dpad_down) {
+            } else if (gamepad2.dpad_down) {
                 double currentArm0Pos = arm0Servo.getPosition();
                 arm0Servo.setPosition(currentArm0Pos-0.01);
             }
-            if (gamepad1.dpad_left) {
+            if (gamepad2.dpad_left) {
                 double currentArm1Pos = arm1Servo.getPosition();
                 arm1Servo.setPosition(currentArm1Pos+0.01);
-            } else if (gamepad1.dpad_right) {
+            } else if (gamepad2.dpad_right) {
                 double currentArm1Pos = arm1Servo.getPosition();
                 arm1Servo.setPosition(currentArm1Pos-0.01);
             }
-            if (gamepad1.a) {
+            if (gamepad2.a) {
                 // Grab the piece
                 clawServo.setPosition(0.45);
-            } else if (gamepad1.b) {
+            } else if (gamepad2.b) {
                 // Extract the piece
                 clawServo.setPosition(0);
             }
 
-            if (gamepad1.x) {
+            if (gamepad2.x) {
                 // Rotate CCW
                 double currentWristPos = wristServo.getPosition();
                 wristServo.setPosition(currentWristPos-0.01);
             }
-            else if (gamepad1.y) {
+            else if (gamepad2.y) {
                 // Rotate CW
                 double currentWristPos = wristServo.getPosition();
                 wristServo.setPosition(currentWristPos+0.01);
