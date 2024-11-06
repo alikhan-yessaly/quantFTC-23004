@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.notcompetition.AUTO;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.utils.ServoPose;
@@ -40,6 +42,16 @@ public class TestPedroAuto extends OpMode {
     // Constants for starting pose
     private static final Pose START_POSE = new Pose(144 - (63 + 72), 12 + 72, 0);
 
+    DcMotor armLift1 = hardwareMap.dcMotor.get("lift1");
+    DcMotor armLift2 = hardwareMap.dcMotor.get("lift2");
+    armLift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    armLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    armLift1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    armLift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    armLift2.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
     public void buildPaths() {
         // Initial path (firstCycle)
         firstCycle = follower.pathBuilder()
@@ -70,15 +82,15 @@ public class TestPedroAuto extends OpMode {
 
     public void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.5, 0.7, 0.7, 1.0, 0.0, 1000),
-                new ServoPose(1.0, 0.5, 0.5, 0.5, 1.0, 1500)
+                new ServoPose(0.7, 0.9, 0.7, 1.0, 0.0, 1000)//,
+//                new ServoPose(1.0, 0.5, 0.5, 0.5, 1.0, 1500)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
 
     public void defineSecondPoseSequence() {
         List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(0.3, 0.6, 0.6, 0.9, 0.0, 1200),
+                new ServoPose(0.5, 0.6, 0.6, 0.9, 0.0, 1200),
                 new ServoPose(1.0, 0.8, 0.8, 1.0, 1.0, 1500)
         );
         servoPoseFollower.setPoseSequence(secondPoses); // Load the new sequence
@@ -126,11 +138,11 @@ public class TestPedroAuto extends OpMode {
                 servoPoseFollower.start();       // Start new servo sequence
                 break;
             case DUMMY_PATH:
-                follower.followPath(dummyPath);  // Start dummy path after first pose
+//                follower.followPath(dummyPath);  // Start dummy path after first pose
                 break;
             case SECOND_POSE:
-                defineSecondPoseSequence();
-                servoPoseFollower.start();
+//                defineSecondPoseSequence();
+//                servoPoseFollower.start();
                 break;
             case FINAL_POSE:
                 // Define any final poses or actions here

@@ -125,8 +125,8 @@ public class QuantumDrive extends LinearOpMode {
             telemetry.update();
 
             if (liftOut) {
-                armLift1.setTargetPosition(min(armLift1CurrentPosition - 50, -1600));
-                armLift2.setTargetPosition(min(armLift2CurrentPosition - 50, -1600));
+                armLift1.setTargetPosition(min(armLift1CurrentPosition - 100, -1600));
+                armLift2.setTargetPosition(min(armLift2CurrentPosition - 100, -1600));
                 armLift1.setPower(1);
                 armLift2.setPower(1);
                 armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -134,8 +134,8 @@ public class QuantumDrive extends LinearOpMode {
                 lastPos1 = armLift1CurrentPosition;
                 lastPos2 = armLift2CurrentPosition;
             } else if (liftIn) {
-                armLift1.setTargetPosition(max(armLift1CurrentPosition + 50, 0));
-                armLift2.setTargetPosition(max(armLift2CurrentPosition + 50, 0));
+                armLift1.setTargetPosition(max(armLift1CurrentPosition + 100, 0));
+                armLift2.setTargetPosition(max(armLift2CurrentPosition + 100, 0));
                 armLift1.setPower(1);
                 armLift2.setPower(1);
                 armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
