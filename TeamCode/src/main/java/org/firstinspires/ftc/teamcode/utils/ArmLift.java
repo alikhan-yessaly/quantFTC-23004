@@ -9,8 +9,8 @@ public class ArmLift {
 
     // Define positions and tolerance
     private static final int DOWN_POSITION = 0;
-    private static final int UP_POSITION = 2230;
-    private static final int POSITION_TOLERANCE = 20;  // Tolerance for "close enough" to target position
+    private static final int UP_POSITION = 1000;
+    private static final int POSITION_TOLERANCE = 50;  // Tolerance for "close enough" to target position
     private static final double MAX_POWER = 1.0;
 
     public ArmLift(HardwareMap hardwareMap) {

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.notcompetition.AUTO;
 
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -21,7 +22,7 @@ import java.util.List;
 public class TestPedroAuto extends OpMode {
 
     private enum AutoState {
-        INITIALIZE, FIRST_PATH, FIRST_POSE, LIFT_DOWN, SECOND_POSE, COMPLETE
+        INITIALIZE, FIRST_PATH, FIRST_POSE, LIFT_UP, SECOND_POSE, THIRD_POSE, LIFT_DOWN, RETURN_POSE, COMPLETE
     }
 
     private AutoState currentState = AutoState.INITIALIZE;
@@ -30,7 +31,7 @@ public class TestPedroAuto extends OpMode {
     private ServoPoseFollower servoPoseFollower;
     private ArmLift armLift;
 
-    private PathChain firstPath;
+    private PathChain firstPath, returnPath;
     private static final Pose START_POSE = new Pose(144 - (63 + 72), 12 + 72, 0);
 
     @Override
@@ -39,9 +40,11 @@ public class TestPedroAuto extends OpMode {
         follower.setStartingPose(START_POSE);
 
         armLift = new ArmLift(hardwareMap);
+        armLift.moveDown();
 
         // Initialize servo poses for the initial state
         defineInitialServoPoses(hardwareMap);
+        servoPoseFollower.start();
 
         telemetry.addData("Init Status", "Initialized with starting pose and servo positions.");
         telemetry.update();
@@ -50,6 +53,7 @@ public class TestPedroAuto extends OpMode {
     @Override
     public void start() {
         firstPath = buildFirstPath();
+        returnPath = buildReturnPath();
         setState(AutoState.FIRST_PATH);
     }
 
@@ -57,7 +61,6 @@ public class TestPedroAuto extends OpMode {
     public void loop() {
         follower.update();
         servoPoseFollower.update();
-
         switch (currentState) {
             case FIRST_PATH:
                 if (follower.isCloseEnoughToEnd()) {
@@ -66,16 +69,32 @@ public class TestPedroAuto extends OpMode {
                 break;
             case FIRST_POSE:
                 if (servoPoseFollower.isComplete()) {
+                    setState(AutoState.SECOND_POSE);
+                }
+                break;
+
+            case SECOND_POSE:
+                if (servoPoseFollower.isComplete()) {
+                    setState(AutoState.LIFT_UP);
+                }
+                break;
+            case LIFT_UP:
+                if (armLift.isAtTarget()) {
+                    setState(AutoState.THIRD_POSE);
+                }
+                break;
+            case THIRD_POSE:
+                if (servoPoseFollower.isComplete()) {
                     setState(AutoState.LIFT_DOWN);
                 }
                 break;
             case LIFT_DOWN:
                 if (armLift.isAtPosition(0)) {
-                    setState(AutoState.SECOND_POSE);
+                    setState(AutoState.RETURN_POSE);
                 }
                 break;
-            case SECOND_POSE:
-                if (servoPoseFollower.isComplete()) {
+            case RETURN_POSE:
+                if (follower.isCloseEnoughToEnd()) {
                     setState(AutoState.COMPLETE);
                 }
                 break;
@@ -107,12 +126,24 @@ public class TestPedroAuto extends OpMode {
                 defineInitialServoPoses(hardwareMap); // Define the initial servo pose
                 servoPoseFollower.start();
                 break;
-            case LIFT_DOWN:
-                armLift.moveDown();
+            case LIFT_UP:
+                armLift.moveUp();
                 break;
             case SECOND_POSE:
                 defineSecondServoPoses(hardwareMap); // Define the second servo pose
                 servoPoseFollower.start();
+                break;
+            case THIRD_POSE:
+                defineThirdServoPoses(hardwareMap);
+                servoPoseFollower.start();
+                break;
+            case LIFT_DOWN:
+                armLift.moveDown();
+                defineFourthServoPoses(hardwareMap);
+                servoPoseFollower.start();
+                break;
+            case RETURN_POSE:
+                follower.followPath(returnPath);
                 break;
             case COMPLETE:
                 telemetry.addData("Status", "Autonomous Complete");
@@ -124,20 +155,37 @@ public class TestPedroAuto extends OpMode {
 
     private PathChain buildFirstPath() {
         return follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        new Point(7.182, 90.359, Point.CARTESIAN),
-                        new Point(33.890, 92.603, Point.CARTESIAN),
-                        new Point(16.833, 74.873, Point.CARTESIAN),
-                        new Point(39.277, 75.546, Point.CARTESIAN)
-                ))
-                .setTangentHeadingInterpolation()
+                .addPath(
+                        // Line 1
+                        new BezierCurve(
+                                new Point(9.757, 84.983, Point.CARTESIAN),
+                                new Point(21.287, 85.148, Point.CARTESIAN),
+                                new Point(18.157, 70.748, Point.CARTESIAN),
+                                new Point(36.500, 72.000, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+    }
+    private PathChain buildReturnPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 1
+                        new BezierCurve(
+                                new Point(36.500, 72.000, Point.CARTESIAN),
+                                new Point(18.157, 70.748, Point.CARTESIAN),
+                                new Point(21.287, 85.148, Point.CARTESIAN),
+                                new Point(9.757, 84.983, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
     // Define the initial servo poses
     private void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0, 0, 0.2, 0.5, 0.4, 1000)
+                new ServoPose(0.0, 0.0, 0.2, 0.5, 0.65, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
@@ -145,8 +193,26 @@ public class TestPedroAuto extends OpMode {
     // Define the second servo poses
     private void defineSecondServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(1.0, 0.0, 0.7, 0.5, 0.3, 1200)
+                new ServoPose(0.2, 0.0, 0.2, 0.5, 0.65, 400),
+                new ServoPose(0.4, 0.6, 0.2, 0.5, 0.65, 400),
+                new ServoPose(0.6, 0.6, 0.2, 0.5, 0.65, 200),
+                new ServoPose(0.7, 0.6, 0.2, 0.5, 0.65, 200)
+
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
+    }
+    // Define the second servo poses
+    private void defineThirdServoPoses(HardwareMap hardwareMap) {
+        List<ServoPose> thirdPoses = Arrays.asList(
+                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 400)
+        );
+        servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);
+    }
+    private void defineFourthServoPoses(HardwareMap hardwareMap) {
+        List<ServoPose> fourthPoses = Arrays.asList(
+                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 400),
+                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.3, 1000)
+        );
+        servoPoseFollower = new ServoPoseFollower(hardwareMap, fourthPoses);
     }
 }
