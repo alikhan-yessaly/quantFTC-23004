@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 @TeleOp(name = "QuantumDrive")
@@ -27,6 +28,7 @@ public class QuantumDrive extends LinearOpMode {
         ServoImplEx arm0Servo = (ServoImplEx)hardwareMap.servo.get("arm0");
         ServoImplEx liftUpServo = (ServoImplEx) hardwareMap.servo.get("liftUp");
         ServoImplEx liftUpLServo = (ServoImplEx) hardwareMap.servo.get("liftUpL");
+        liftUpServo.setDirection(Servo.Direction.REVERSE);
         PwmControl.PwmRange pwmRange = new PwmControl.PwmRange(500, 2500);
         liftUpServo.setPwmRange(pwmRange);
         liftUpLServo.setPwmRange(pwmRange);
@@ -81,20 +83,23 @@ public class QuantumDrive extends LinearOpMode {
             boolean liftUp = gamepad1.right_bumper;
             boolean liftDown = gamepad1.right_trigger > 0.1;
 
+            double currentArm0Pos = arm0Servo.getPosition();
+            telemetry.addData("arm0:", currentArm0Pos);
             if (gamepad1.dpad_up) {
-                double currentArm0Pos = arm0Servo.getPosition();
                 arm0Servo.setPosition(currentArm0Pos+0.01);
             } else if (gamepad1.dpad_down) {
-                double currentArm0Pos = arm0Servo.getPosition();
                 arm0Servo.setPosition(currentArm0Pos-0.01);
             }
+
+            double currentArm1Pos = arm1Servo.getPosition();
+            telemetry.addData("arm1:", currentArm1Pos);
             if (gamepad1.dpad_left) {
-                double currentArm1Pos = arm1Servo.getPosition();
                 arm1Servo.setPosition(currentArm1Pos+0.01);
             } else if (gamepad1.dpad_right) {
-                double currentArm1Pos = arm1Servo.getPosition();
                 arm1Servo.setPosition(currentArm1Pos-0.01);
             }
+
+
             if (gamepad1.a) {
                 // Grab the piece
                 clawServo.setPosition(0.45);
@@ -102,32 +107,34 @@ public class QuantumDrive extends LinearOpMode {
                 // Extract the piece
                 clawServo.setPosition(0);
             }
+            double currentWristPos = wristServo.getPosition();
+            telemetry.addData("wrist:", currentWristPos);
 
             if (gamepad1.x) {
-                // Rotate CCW
-                double currentWristPos = wristServo.getPosition();
                 wristServo.setPosition(currentWristPos-0.01);
             }
             else if (gamepad1.y) {
-                // Rotate CW
-                double currentWristPos = wristServo.getPosition();
                 wristServo.setPosition(currentWristPos+0.01);
             }
+
+            double currentLiftPos = liftUpServo.getPosition();
+            double currentLiftPosL = liftUpLServo.getPosition();
+            telemetry.addData("liftUp:", currentLiftPos);
+            telemetry.addData("liftUpL:", currentLiftPosL);
             if (liftUp){
-                double currentLiftPos = liftUpServo.getPosition();
-                liftUpServo.setPosition(currentLiftPos-0.01);
-                double currentLiftPosL = liftUpLServo.getPosition();
+                liftUpServo.setPosition(currentLiftPos+0.01);
                 liftUpLServo.setPosition(currentLiftPosL+0.01);
             }
-            if (liftDown){
-                double currentLiftPos = liftUpServo.getPosition();
-                liftUpServo.setPosition(currentLiftPos+0.01);
-                double currentLiftPosL = liftUpLServo.getPosition();
+            else if (liftDown){
+                liftUpServo.setPosition(currentLiftPos-0.01);
                 liftUpLServo.setPosition(currentLiftPosL-0.01);
             }
 
             int armLift1CurrentPosition = armLift1.getCurrentPosition();
             int armLift2CurrentPosition = armLift2.getCurrentPosition();
+            telemetry.addData("lift1:", armLift1CurrentPosition);
+            telemetry.addData("lift2:", armLift2CurrentPosition);
+            telemetry.update();
             if (liftOut) {
                 armLift1.setTargetPosition(min(armLift1CurrentPosition - 50,-1600));
                 armLift1.setPower(1);
