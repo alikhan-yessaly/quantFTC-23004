@@ -79,6 +79,10 @@ public class Follower {
 
     private PathChain currentPathChain;
 
+    // Position and heading tolerance for proximity checks
+    private static final double POSITION_TOLERANCE = 2.0; // e.g., 2 cm
+    private static final double HEADING_TOLERANCE = Math.toRadians(5); // e.g., 5 degrees
+
     private final int BEZIER_CURVE_BINARY_STEP_LIMIT = FollowerConstants.BEZIER_CURVE_BINARY_STEP_LIMIT;
     private final int AVERAGED_VELOCITY_SAMPLE_NUMBER = FollowerConstants.AVERAGED_VELOCITY_SAMPLE_NUMBER;
 
@@ -1022,4 +1026,42 @@ public class Follower {
     public void resetIMU() {
         poseUpdater.resetIMU();
     }
+    /**
+     * Checks if the robot is close enough to a given target Pose.
+     *
+     * @param targetPose the Pose to compare against the robot's current Pose.
+     * @return true if the robot is within the position and heading tolerance, false otherwise.
+     */
+    public boolean isCloseEnoughToPose(Pose targetPose) {
+        Pose currentPose = getPose();
+
+        // Calculate the Euclidean distance to the target pose
+        double distanceToPose = Math.hypot(
+                targetPose.getX() - currentPose.getX(),
+                targetPose.getY() - currentPose.getY()
+        );
+
+        // Calculate the heading difference
+        double headingDifference = Math.abs(targetPose.getHeading() - currentPose.getHeading());
+
+        // Check if both distance and heading are within tolerance
+        return distanceToPose <= POSITION_TOLERANCE && headingDifference <= HEADING_TOLERANCE;
+    }
+
+    /**
+     * Checks if the robot is close enough to the end of the current path.
+     *
+     * @return true if the robot is within tolerance of the end pose of the current path.
+     */
+    public boolean isCloseEnoughToEnd() {
+        // Check if the current path exists and has a last control point
+        if (currentPath != null && currentPath.getLastControlPoint() != null) {
+            Point endPoint = currentPath.getLastControlPoint();
+            // Convert Point to Pose with a heading of 0 (or another appropriate heading)
+            Pose endPose = new Pose(endPoint.getX(), endPoint.getY(), 0);
+            return isCloseEnoughToPose(endPose);
+        }
+        return false;
+    }
+
 }
