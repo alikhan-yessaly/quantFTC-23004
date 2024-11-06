@@ -68,4 +68,12 @@ public class ServoPoseFollower {
     public boolean isComplete() {
         return isComplete;
     }
+    // In ServoPoseFollower class
+    public ServoPose getCurrentPose() {
+        if (currentPoseIndex >= 0 && currentPoseIndex < poses.size()) {
+            return poses.get(currentPoseIndex);
+        }
+        return null; // Return null if there is no valid current pose
+    }
+
 }
