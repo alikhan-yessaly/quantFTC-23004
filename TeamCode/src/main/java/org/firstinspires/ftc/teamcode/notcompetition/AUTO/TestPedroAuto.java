@@ -211,7 +211,7 @@ public class TestPedroAuto extends OpMode {
     private void defineFourthServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> fourthPoses = Arrays.asList(
                 new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 400),
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.3, 1000)
+                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.2, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, fourthPoses);
     }

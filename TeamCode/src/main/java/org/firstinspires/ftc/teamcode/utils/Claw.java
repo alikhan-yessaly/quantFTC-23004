@@ -9,7 +9,7 @@ public class Claw {
 
     // Define specific positions for open and closed states
     private static final double GRAB_POSITION = 0.65; // Adjust this to the desired closed position
-    private static final double RELEASE_POSITION = 0.3; // Adjust this to the desired open position
+    private static final double RELEASE_POSITION = 0.2; // Adjust this to the desired open position
 
     public Claw(HardwareMap hardwareMap) {
         clawServo = hardwareMap.get(ServoImplEx.class, "claw");
