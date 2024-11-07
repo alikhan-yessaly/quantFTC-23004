@@ -22,7 +22,7 @@ import java.util.List;
 public class TestPedroAuto extends OpMode {
 
     private enum AutoState {
-        INITIALIZE, FIRST_PATH, FIRST_POSE, LIFT_UP, SECOND_POSE, THIRD_POSE, LIFT_DOWN, RETURN_POSE, COMPLETE
+        INITIALIZE, FIRST_PATH, FIRST_POSE, SECOND_POSE, LIFT_UP, THIRD_POSE, LIFT_DOWN, RETURN_POSE, COMPLETE
     }
 
     private AutoState currentState = AutoState.INITIALIZE;
@@ -79,9 +79,9 @@ public class TestPedroAuto extends OpMode {
                 }
                 break;
             case LIFT_UP:
-                if (armLift.isAtTarget()) {
+//                if (armLift.isAtTarget()) {
                     setState(AutoState.THIRD_POSE);
-                }
+//                }
                 break;
             case THIRD_POSE:
                 if (servoPoseFollower.isComplete()) {
@@ -126,12 +126,12 @@ public class TestPedroAuto extends OpMode {
                 defineInitialServoPoses(hardwareMap); // Define the initial servo pose
                 servoPoseFollower.start();
                 break;
-            case LIFT_UP:
-                armLift.moveUp();
-                break;
             case SECOND_POSE:
                 defineSecondServoPoses(hardwareMap); // Define the second servo pose
                 servoPoseFollower.start();
+                break;
+            case LIFT_UP:
+                armLift.moveUp();
                 break;
             case THIRD_POSE:
                 defineThirdServoPoses(hardwareMap);
@@ -161,7 +161,7 @@ public class TestPedroAuto extends OpMode {
                                 new Point(9.757, 84.983, Point.CARTESIAN),
                                 new Point(21.287, 85.148, Point.CARTESIAN),
                                 new Point(18.157, 70.748, Point.CARTESIAN),
-                                new Point(36.500, 72.000, Point.CARTESIAN)
+                                new Point(38.500, 72.000, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -172,7 +172,7 @@ public class TestPedroAuto extends OpMode {
                 .addPath(
                         // Line 1
                         new BezierCurve(
-                                new Point(36.500, 72.000, Point.CARTESIAN),
+                                new Point(38.500, 72.000, Point.CARTESIAN),
                                 new Point(18.157, 70.748, Point.CARTESIAN),
                                 new Point(21.287, 85.148, Point.CARTESIAN),
                                 new Point(9.757, 84.983, Point.CARTESIAN)
@@ -193,10 +193,10 @@ public class TestPedroAuto extends OpMode {
     // Define the second servo poses
     private void defineSecondServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(0.2, 0.0, 0.2, 0.5, 0.65, 400),
-                new ServoPose(0.4, 0.6, 0.2, 0.5, 0.65, 400),
-                new ServoPose(0.6, 0.6, 0.2, 0.5, 0.65, 200),
-                new ServoPose(0.7, 0.6, 0.2, 0.5, 0.65, 200)
+                new ServoPose(0.2, 0.0, 0.2, 0.5, 0.65, 100),
+                new ServoPose(0.4, 0.0, 0.2, 0.5, 0.65, 100),
+                new ServoPose(0.6, 0.0, 0.2, 0.5, 0.65, 100),
+                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100)
 
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
@@ -204,7 +204,11 @@ public class TestPedroAuto extends OpMode {
     // Define the second servo poses
     private void defineThirdServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> thirdPoses = Arrays.asList(
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 400)
+                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 500),
+                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100),
+                new ServoPose(0.7, 0.2, 0.6, 0.5, 0.65, 100),
+                new ServoPose(0.7, 0.4, 0.8, 0.5, 0.65, 100),
+                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 100)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);
     }
