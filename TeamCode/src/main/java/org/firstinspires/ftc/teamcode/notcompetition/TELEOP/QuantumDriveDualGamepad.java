@@ -97,10 +97,10 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
             }
             if (gamepad2.a) {
                 // Grab the piece
-                clawServo.setPosition(0.45);
+                clawServo.setPosition(0.65);
             } else if (gamepad2.b) {
                 // Extract the piece
-                clawServo.setPosition(0);
+                clawServo.setPosition(0.3);
             }
 
             if (gamepad2.x) {

@@ -138,7 +138,7 @@ public class PathBuilder {
      * There really shouldn't be a reason to use this since the default heading interpolation is
      * tangential but it's here.
      */
-    public PathBuilder setTangentHeadingInterpolation() {
+    public PathBuilder setTangentialHeadingInterpolation() {
         this.paths.get(paths.size() - 1).setTangentHeadingInterpolation();
         return this;
     }

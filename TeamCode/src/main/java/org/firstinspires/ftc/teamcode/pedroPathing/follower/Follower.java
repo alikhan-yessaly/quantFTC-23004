@@ -80,7 +80,7 @@ public class Follower {
     private PathChain currentPathChain;
 
     // Position and heading tolerance for proximity checks
-    private static final double POSITION_TOLERANCE = 2.0; // e.g., 2 cm
+    private static final double POSITION_TOLERANCE = 2.0; // e.g., 2 inch
     private static final double HEADING_TOLERANCE = Math.toRadians(5); // e.g., 5 degrees
 
     private final int BEZIER_CURVE_BINARY_STEP_LIMIT = FollowerConstants.BEZIER_CURVE_BINARY_STEP_LIMIT;

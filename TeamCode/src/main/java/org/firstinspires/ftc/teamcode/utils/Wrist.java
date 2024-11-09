@@ -8,17 +8,17 @@ public class Wrist {
     private final ServoImplEx wristServo;
 
     // Define the preset positions
-    private static final double POSITION_1 = 0.2; // Adjust these values as needed
+    private static final double POSITION_1 = 0; // Adjust these values as needed
     private static final double POSITION_2 = 0.5;
-    private static final double POSITION_3 = 0.8;
+    private static final double POSITION_3 = 1;
 
     private int positionIndex = 0; // Tracks the current position in the cycle
 
     public Wrist(HardwareMap hardwareMap) {
         wristServo = hardwareMap.get(ServoImplEx.class, "wrist");
 
-        PwmControl.PwmRange pwmRange = new PwmControl.PwmRange(500, 2500);
-        wristServo.setPwmRange(pwmRange);
+     /*   PwmControl.PwmRange pwmRange = new PwmControl.PwmRange(500, 2500);*/
+      /*  wristServo.setPwmRange(pwmRange);*/
 
         // Initialize to the first position
         setPosition(POSITION_1);
