@@ -69,6 +69,7 @@ public class TestPedroAuto extends OpMode {
                 break;
             case FIRST_POSE:
                 if (servoPoseFollower.isComplete()) {
+
                     setState(AutoState.SECOND_POSE);
                 }
                 break;

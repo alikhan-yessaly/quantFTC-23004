@@ -70,6 +70,9 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Servo poses for clip on the wall
+        double[] clipWall = {0.5, 0.5, 0.55, 0.35, 0.3};
+
         // Main loop: run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double y = gamepad1.left_stick_y;
@@ -173,6 +176,15 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
                 backLeftTargetPower = (y - x + rx) / denominator;
                 frontRightTargetPower = 1.1*(y - x - rx) / denominator;
                 backRightTargetPower = (y + x - rx) / denominator;
+            }
+
+            if (gamepad2.right_stick_y > 0.5) {
+                // Set servos to the pose positions when right stick Y is greater than 0.5
+                arm0Servo.setPosition(clipWall[0]);
+                arm1Servo.setPosition(clipWall[1]);
+                wristServo.setPosition(clipWall[2]);
+                clawServo.setPosition(clipWall[3]);
+                liftUpServo.setPosition(clipWall[4]);
             }
 
             // Ramp up motor powers towards target powers
