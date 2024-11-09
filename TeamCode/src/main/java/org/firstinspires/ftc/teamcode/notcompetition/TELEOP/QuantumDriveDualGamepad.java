@@ -186,7 +186,14 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
                 clawServo.setPosition(clipWall[3]);
                 liftUpServo.setPosition(clipWall[4]);
             }
-
+            telemetry.addData("Servo Positions", "----");
+            telemetry.addData("Arm0 Servo", arm0Servo.getPosition());
+            telemetry.addData("Arm1 Servo", arm1Servo.getPosition());
+            telemetry.addData("Wrist Servo", wristServo.getPosition());
+            telemetry.addData("Claw Servo", clawServo.getPosition());
+            telemetry.addData("LiftUp Servo", liftUpServo.getPosition());
+            telemetry.addData("LiftUpL Servo", liftUpLServo.getPosition());
+            telemetry.update();
             // Ramp up motor powers towards target powers
             frontLeftPower += rampUpRate * (frontLeftTargetPower - frontLeftPower);
             backLeftPower += rampUpRate * (backLeftTargetPower - backLeftPower);
