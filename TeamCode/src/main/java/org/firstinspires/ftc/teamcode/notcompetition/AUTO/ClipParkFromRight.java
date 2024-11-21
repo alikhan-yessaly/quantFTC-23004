@@ -23,7 +23,7 @@ public class ClipParkFromRight extends OpMode {
     private enum AutoState {
         INITIALIZE, FIRST_PATH, FIRST_POSE, SECOND_POSE, LIFT_UP, THIRD_POSE, LIFT_DOWN, PARK_POSE, COMPLETE
     }
-
+    private boolean dealyDone = false;
     private AutoState currentState = AutoState.INITIALIZE;
     private Timer opmodeTimer = new Timer();
     private Follower follower;
@@ -53,11 +53,16 @@ public class ClipParkFromRight extends OpMode {
     public void start() {
         firstPath = buildFirstPath();
         parkPath = buildParkPath();
-        setState(AutoState.FIRST_PATH);
+        opmodeTimer.resetTimer();
+
     }
 
     @Override
     public void loop() {
+        if (!dealyDone && opmodeTimer.getElapsedTime() >= 10000) {
+            dealyDone = true;
+            setState(AutoState.FIRST_PATH); // Start the path after the delay
+        }
         follower.update();
         servoPoseFollower.update();
         switch (currentState) {
@@ -119,12 +124,13 @@ public class ClipParkFromRight extends OpMode {
         opmodeTimer.resetTimer();
         switch (newState) {
             case FIRST_PATH:
-                follower.followPath(firstPath);
+                follower.followPath(firstPath); // Start the path after the delay
                 break;
             case FIRST_POSE:
                 defineInitialServoPoses(hardwareMap); // Define the initial servo pose
                 servoPoseFollower.start();
                 break;
+
             case SECOND_POSE:
                 defineSecondServoPoses(hardwareMap); // Define the second servo pose
                 servoPoseFollower.start();
@@ -181,7 +187,7 @@ public class ClipParkFromRight extends OpMode {
     // Define the initial servo poses
     private void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.0, 0.0, 0.2, 0.5, 0.65, 1000)
+                new ServoPose(0.0, 0.0, 0.3, 0.5, 0.65, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
@@ -189,10 +195,10 @@ public class ClipParkFromRight extends OpMode {
     // Define the second servo poses
     private void defineSecondServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(0.2, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.4, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.6, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100)
+                new ServoPose(0.2, 0.0, 0.3, 0.5, 0.65, 100),
+                new ServoPose(0.4, 0.0, 0.3, 0.5, 0.65, 100),
+                new ServoPose(0.6, 0.0, 0.3, 0.5, 0.65, 100),
+                new ServoPose(0.7, 0.0, 0.3, 0.5, 0.65, 100)
 
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
@@ -200,8 +206,8 @@ public class ClipParkFromRight extends OpMode {
     // Define the second servo poses
     private void defineThirdServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> thirdPoses = Arrays.asList(
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 500),
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100),
+                new ServoPose(0.7, 0.0, 0.3, 0.5, 0.65, 500),
+                new ServoPose(0.7, 0.0, 0.3, 0.5, 0.65, 100),
                 new ServoPose(0.7, 0.2, 0.6, 0.5, 0.65, 100),
                 new ServoPose(0.7, 0.4, 0.8, 0.5, 0.65, 100),
                 new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 100)

@@ -2,12 +2,19 @@ package org.firstinspires.ftc.teamcode.notcompetition.AUTO;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierCurve;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierLine;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.PathChain;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
+import org.firstinspires.ftc.teamcode.utils.ServoPose;
+import org.firstinspires.ftc.teamcode.utils.ServoPoseFollower;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Autonomous(name = "AutoPathing", group = "Autonomous")
 public class AutoPathing extends OpMode {
@@ -19,6 +26,7 @@ public class AutoPathing extends OpMode {
     private AutoState currentState = AutoState.FIRST_PATH;
     private Follower follower;
     private PathChain firstPath, secondPath, thirdPath, fourthForwardPath, fourthBackwardPath, fifthPath, sixthForwardPath, sixthBackwardPath, seventhPath, eighthForwardPath, eighthBackwardPath;
+    private ServoPoseFollower servoPoseFollower;
     private static final Pose START_POSE = new Pose(144 - (63 + 72), 12 + 72, 0);
 
     @Override
@@ -43,6 +51,7 @@ public class AutoPathing extends OpMode {
         seventhPath = SeventhPath();
         eighthForwardPath = EighthForwardPath();
         eighthBackwardPath = EighthBackwardPath();
+
 
         // Start with the first path
         follower.followPath(firstPath);
@@ -190,6 +199,12 @@ public class AutoPathing extends OpMode {
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
+    }
+    private void defineInitialServoPoses(HardwareMap hardwareMap) {
+        List<ServoPose> initialPoses = Arrays.asList(
+                new ServoPose(0.0, 0.0, 0.3, 0.5, 0.65, 1000)
+        );
+        servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
     private PathChain SecondPath() {
         return follower.pathBuilder()

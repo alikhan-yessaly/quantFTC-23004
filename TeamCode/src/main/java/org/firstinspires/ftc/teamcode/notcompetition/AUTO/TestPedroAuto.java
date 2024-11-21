@@ -42,6 +42,7 @@ public class TestPedroAuto extends OpMode {
         armLift = new ArmLift(hardwareMap);
         armLift.moveDown();
 
+
         // Initialize servo poses for the initial state
         defineInitialServoPoses(hardwareMap);
         servoPoseFollower.start();
@@ -186,7 +187,7 @@ public class TestPedroAuto extends OpMode {
     // Define the initial servo poses
     private void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.0, 0.0, 0.2, 0.5, 0.65, 1000)
+                new ServoPose(0.0, 0.0, 0.2, 0.9, 0.65, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
