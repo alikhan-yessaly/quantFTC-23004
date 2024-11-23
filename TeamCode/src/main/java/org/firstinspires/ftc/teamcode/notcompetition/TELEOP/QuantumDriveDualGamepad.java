@@ -9,6 +9,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorDigitalTouch;
 
 @TeleOp(name = "QuantumDriveDualGamepad")
 public class QuantumDriveDualGamepad extends LinearOpMode {
@@ -20,6 +23,8 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
         DcMotor backRightMotor = hardwareMap.dcMotor.get("rightBack");
         DcMotor armLift1 = hardwareMap.dcMotor.get("lift1");
         DcMotor armLift2 = hardwareMap.dcMotor.get("lift2");
+
+        TouchSensor touch = hardwareMap.touchSensor.get("touch");
 
         ServoImplEx clawServo = (ServoImplEx)hardwareMap.servo.get("claw");
         ServoImplEx wristServo = (ServoImplEx)hardwareMap.servo.get("wrist");
@@ -70,11 +75,20 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Constants
+        int liftOutTarget = -2200; // Maximum extension position
+        int liftInTarget = 0;      // Fully retracted position
+        double liftHoldPower = 0.3; // Power to hold the current position
+
         // Servo poses for clip on the wall
-        double[] clipWall = {0.58, 0.5, 1, 0.35, 0.17};
-        double[] clipBar = {0.2865, 0.8, 0.1, 0.65, 0.66};
-        double[] piecePick1 = {0.6, 1, 0.5, 0.35, 0.17};
-        double[] piecePick2 = {0.6, 1, 1, 0.35, 0.17};
+        double[] clipWall = {0.5105, 0, 0.228, 0.679, 0.65};
+        double[] clipBar = {0.692, 0.789, 0.4995, 0.666, 0.35};
+        double[] piecePick1 = {0.692,0.4, 0.4995, 0.666, 0.35};
+        double[] piecePick2 = {0.7, 0, 0.228, 0.679, 0.65};
+        int currentLiftPosition1, currentLiftPosition2;
+
+
 
         // Main loop: run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -121,45 +135,52 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
             }
             if (liftUp){
                 double currentLiftPos = liftUpServo.getPosition();
-                liftUpServo.setPosition(currentLiftPos-0.01);
+                liftUpServo.setPosition(currentLiftPos+0.02);
                 double currentLiftPosL = liftUpLServo.getPosition();
-                liftUpLServo.setPosition(currentLiftPosL-0.01);
+                liftUpLServo.setPosition(currentLiftPosL+0.02);
             }
             if (liftDown){
                 double currentLiftPos = liftUpServo.getPosition();
-                liftUpServo.setPosition(currentLiftPos+0.01);
+                liftUpServo.setPosition(currentLiftPos-0.02);
                 double currentLiftPosL = liftUpLServo.getPosition();
-                liftUpLServo.setPosition(currentLiftPosL+0.01);
+                liftUpLServo.setPosition(currentLiftPosL-0.02);
             }
 
-            int armLift1CurrentPosition = armLift1.getCurrentPosition();
-            int armLift2CurrentPosition = armLift2.getCurrentPosition();
+            currentLiftPosition1 = armLift1.getCurrentPosition();
+            currentLiftPosition2 = armLift2.getCurrentPosition();
+
             if (liftOut) {
-                armLift1.setTargetPosition(min(armLift1CurrentPosition - 50,-1600));
+                // Run motors to top position
+                armLift1.setTargetPosition(liftOutTarget);
+                armLift2.setTargetPosition(liftOutTarget);
                 armLift1.setPower(1);
-                armLift2.setTargetPosition(min(armLift2CurrentPosition - 50,-1600));
                 armLift2.setPower(1);
                 armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                lastPos1 = armLift1CurrentPosition;
-                lastPos2 = armLift2CurrentPosition;
-            } else if (liftIn) {
-                armLift1.setTargetPosition(max(armLift1CurrentPosition + 50, 0)); // Initial position is 0
+            } else if (liftIn && !touch.isPressed()) {
+                // Run motors to bottom position unless touch sensor is pressed
+                armLift1.setTargetPosition(liftInTarget);
+                armLift2.setTargetPosition(liftInTarget);
                 armLift1.setPower(1);
-                armLift2.setTargetPosition(max(armLift2CurrentPosition + 50, 0)); // Initial position is 0
                 armLift2.setPower(1);
                 armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                lastPos1 = armLift1CurrentPosition;
-                lastPos2 = armLift2CurrentPosition;
             } else {
-                // Hold position when button is not pressed
-                armLift1.setTargetPosition(lastPos1);
-                armLift1.setPower(0.3); // Reduced power for holding
-                armLift2.setTargetPosition(lastPos2);
-                armLift2.setPower(0.3); // Reduced power for holding
+                // Hold current position
+                armLift1.setTargetPosition(currentLiftPosition1);
+                armLift2.setTargetPosition(currentLiftPosition2);
+                armLift1.setPower(liftHoldPower);
+                armLift2.setPower(liftHoldPower);
                 armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+
+            if (touch.isPressed()) {
+                // Reset encoders when the lift is fully retracted
+                armLift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                armLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                armLift1.setTargetPosition(liftInTarget);
+                armLift2.setTargetPosition(liftInTarget);
             }
 
             if (Math.abs(y) < deadzone && Math.abs(x) < deadzone && Math.abs(rx) < deadzone) {
@@ -182,45 +203,53 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
             }
 
             if (gamepad2.right_stick_y > 0.5) {
-                // Set servos to the pose positions when right stick Y is greater than 0.5
-                arm0Servo.setPosition(clipWall[0]);
-                arm1Servo.setPosition(clipWall[1]);
-                wristServo.setPosition(clipWall[2]);
-                clawServo.setPosition(clipWall[3]);
-                liftUpServo.setPosition(clipWall[4]);
-                liftUpLServo.setPosition(clipWall[4]);
+                armLift1.setTargetPosition(0); // Initial position is 0
+                armLift1.setPower(1);
+                armLift2.setTargetPosition(0); // Initial position is 0
+                armLift2.setPower(1);
+                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                liftUpServo.setPosition(clipWall[0]);
+                liftUpLServo.setPosition(clipWall[0]);
+                arm0Servo.setPosition(clipWall[1]);
+                arm1Servo.setPosition(clipWall[2]);
+                wristServo.setPosition(clipWall[3]);
+                clawServo.setPosition(clipWall[4]);
+
             }
             else if (gamepad2.right_stick_y < - 0.5){
-                arm0Servo.setPosition(clipBar[0]);
-                arm1Servo.setPosition(clipBar[1]);
-                wristServo.setPosition(clipBar[2]);
-                clawServo.setPosition(clipBar[3]);
-                liftUpServo.setPosition(clipBar[4]);
-                liftUpLServo.setPosition(clipBar[4]);
+                liftUpServo.setPosition(clipBar[0]);
+                liftUpLServo.setPosition(clipBar[0]);
+                arm0Servo.setPosition(clipBar[1]);
+                arm1Servo.setPosition(clipBar[2]);
+                wristServo.setPosition(clipBar[3]);
+                clawServo.setPosition(clipBar[4]);
+
             }
             else if (gamepad2.right_stick_x > 0.5){
-                arm0Servo.setPosition(piecePick1[0]);
-                arm1Servo.setPosition(piecePick1[1]);
-                wristServo.setPosition(piecePick1[2]);
-                clawServo.setPosition(piecePick1[3]);
-                liftUpServo.setPosition(piecePick1[4]);
-                liftUpLServo.setPosition(piecePick1[4]);
+                liftUpServo.setPosition (piecePick1[0]);
+                liftUpLServo.setPosition(piecePick1[0]);
+                arm0Servo.setPosition   (piecePick1[1]);
+                arm1Servo.setPosition   (piecePick1[2]);
+                wristServo.setPosition  (piecePick1[3]);
+                clawServo.setPosition   (piecePick1[4]);
+
             } else if (gamepad2.right_stick_x < -0.5) {
-                arm0Servo.setPosition(piecePick2[0]);
-                arm1Servo.setPosition(piecePick2[1]);
-                wristServo.setPosition(piecePick2[2]);
-                clawServo.setPosition(piecePick2[3]);
-                liftUpServo.setPosition(piecePick2[4]);
-                liftUpLServo.setPosition(piecePick2[4]);
+                liftUpServo.setPosition (piecePick2[0]);
+                liftUpLServo.setPosition(piecePick2[0]);
             }
 
             telemetry.addData("Servo Positions", "----");
+            telemetry.addData("Lift1 Position", currentLiftPosition1);
+            telemetry.addData("Lift2 Position", currentLiftPosition2);
+            telemetry.addData("LiftUp Servo", liftUpServo.getPosition());
+            telemetry.addData("LiftUpL Servo", liftUpLServo.getPosition());
             telemetry.addData("Arm0 Servo", arm0Servo.getPosition());
             telemetry.addData("Arm1 Servo", arm1Servo.getPosition());
             telemetry.addData("Wrist Servo", wristServo.getPosition());
             telemetry.addData("Claw Servo", clawServo.getPosition());
-            telemetry.addData("LiftUp Servo", liftUpServo.getPosition());
-            telemetry.addData("LiftUpL Servo", liftUpLServo.getPosition());
+
             telemetry.update();
             // Ramp up motor powers towards target powers
             frontLeftPower += rampUpRate * (frontLeftTargetPower - frontLeftPower);
