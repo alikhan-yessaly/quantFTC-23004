@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierCurve;
+import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierLine;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.PathChain;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
 import org.firstinspires.ftc.teamcode.pedroPathing.util.Timer;
@@ -20,17 +21,17 @@ import java.util.List;
 @Autonomous(name = "ClipParkRight", group = "Autonomous")
 public class ClipParkRight extends OpMode {
     private enum AutoState {
-        INITIALIZE, FIRST_PATH, FIRST_POSE, SECOND_POSE, LIFT_UP, THIRD_POSE, LIFT_DOWN, PARK_POSE, COMPLETE
+        INITIALIZE, FIRST_PATH, FIRST_POSE, SECOND_POSE, LIFT_UP, THIRD_PATH , THIRD_POSE , FOURTH_PATH , FIFTH_PATH , SIXTH_PATH , SEVENTH_PATH , EIGHTH_PATH , NINTH_PATH, TENTH_PATH , LIFT_DOWN, SECOND_PATH, COMPLETE
     }
 
     private AutoState currentState = AutoState.INITIALIZE;
     private Timer opmodeTimer = new Timer();
     private Follower follower;
-    private ServoPoseFollower servoPoseFollower;
+//    private ServoPoseFollower servoPoseFollower;
     private ArmLift armLift;
 
-    private PathChain firstPath, parkPath;
-    private static final Pose START_POSE = new Pose(144 - (63 + 72), 12 + 72, 0);
+    private PathChain firstPath, secondPath , thirdPath , fourthPath , fifthPath , sixthPath , seventhPath , eighthPath , ninthPath , tenthPath;
+    private static final Pose START_POSE = new Pose(11.215, 60.336, 0);
 
     @Override
     public void init() {
@@ -41,8 +42,8 @@ public class ClipParkRight extends OpMode {
         armLift.moveDown();
 
         // Initialize servo poses for the initial state
-        defineInitialServoPoses(hardwareMap);
-        servoPoseFollower.start();
+//        defineInitialServoPoses(hardwareMap);
+//        servoPoseFollower.start();
 
         telemetry.addData("Init Status", "Initialized with starting pose and servo positions.");
         telemetry.update();
@@ -51,47 +52,92 @@ public class ClipParkRight extends OpMode {
     @Override
     public void start() {
         firstPath = buildFirstPath();
-        parkPath = buildParkPath();
+        secondPath = buildSecondPath();
+        thirdPath = buildThirdPath();
+        fourthPath = buildFourthPath();
+        fifthPath = buildFifthPath();
+        sixthPath = buildSixthPath();
+        seventhPath = buildSeventhPath();
+        eighthPath = buildEighthPath();
+        ninthPath = buildNinthPath();
+        tenthPath = buildTenthPath();
         setState(AutoState.FIRST_PATH);
     }
 
     @Override
     public void loop() {
         follower.update();
-        servoPoseFollower.update();
+//        servoPoseFollower.update();
         switch (currentState) {
             case FIRST_PATH:
                 if (follower.isCloseEnoughToEnd()) {
-                    setState(AutoState.FIRST_POSE);
+                    setState(AutoState.SECOND_PATH);
                 }
                 break;
-            case FIRST_POSE:
-                if (servoPoseFollower.isComplete()) {
-                    setState(AutoState.SECOND_POSE);
-                }
-                break;
-
-            case SECOND_POSE:
-                if (servoPoseFollower.isComplete()) {
-                    setState(AutoState.LIFT_UP);
-                }
-                break;
-            case LIFT_UP:
-//                if (armLift.isAtTarget()) {
-                setState(AutoState.THIRD_POSE);
+//            case FIRST_POSE:
+//                if (servoPoseFollower.isComplete()) {
+//                    setState(AutoState.SECOND_POSE);
 //                }
-                break;
-            case THIRD_POSE:
-                if (servoPoseFollower.isComplete()) {
-                    setState(AutoState.LIFT_DOWN);
+//                break;
+
+//            case SECOND_POSE:
+//                if (servoPoseFollower.isComplete()) {
+//                    setState(AutoState.COMPLETE);
+//                }
+//                break;
+//            case LIFT_UP:
+////                if (armLift.isAtTarget()) {
+//                setState(AutoState.THIRD_POSE);
+////                }
+//                break;
+//            case THIRD_POSE:
+//                if (servoPoseFollower.isComplete()) {
+//                    setState(AutoState.LIFT_DOWN);
+//                }
+//                break;
+//            case LIFT_DOWN:
+//                if (armLift.isAtPosition(0)) {
+//                    setState(AutoState.PARK_POSE);
+//                }
+//                break;
+            case SECOND_PATH:
+                if (follower.isCloseEnoughToEnd()) {
+                    setState(AutoState.THIRD_PATH);
+                }
+            case THIRD_PATH:
+                if (follower.isCloseEnoughToEnd()) {
+                    setState(AutoState.FOURTH_PATH);
+                }
+            case FOURTH_PATH:
+                if (follower.isCloseEnoughToEnd()) {
+                    setState(AutoState.FIFTH_PATH);
                 }
                 break;
-            case LIFT_DOWN:
-                if (armLift.isAtPosition(0)) {
-                    setState(AutoState.PARK_POSE);
+            case FIFTH_PATH:
+                if (follower.isCloseEnoughToEnd()) {
+                    setState(AutoState.SIXTH_PATH);
                 }
                 break;
-            case PARK_POSE:
+            case SIXTH_PATH:
+                if (follower.isCloseEnoughToEnd()) {
+                    setState(AutoState.SEVENTH_PATH);
+                }
+                break;
+            case SEVENTH_PATH:
+                if (follower.isCloseEnoughToEnd()) {
+                    setState(AutoState.EIGHTH_PATH);
+                }
+                break;
+            case EIGHTH_PATH:
+                if (follower.isCloseEnoughToEnd()) {
+                    setState(AutoState.NINTH_PATH);
+                }
+                break;
+            case NINTH_PATH:
+                if (follower.isCloseEnoughToEnd()) {
+                    setState(AutoState.TENTH_PATH);
+                }
+            case TENTH_PATH:
                 if (follower.isCloseEnoughToEnd()) {
                     setState(AutoState.COMPLETE);
                 }
@@ -120,28 +166,52 @@ public class ClipParkRight extends OpMode {
             case FIRST_PATH:
                 follower.followPath(firstPath);
                 break;
-            case FIRST_POSE:
-                defineInitialServoPoses(hardwareMap); // Define the initial servo pose
-                servoPoseFollower.start();
+//            case FIRST_POSE:
+//                defineInitialServoPoses(hardwareMap); // Define the initial servo pose
+//                servoPoseFollower.start();
+//                break;
+//            case SECOND_POSE:
+//                defineSecondServoPoses(hardwareMap); // Define the second servo pose
+//                servoPoseFollower.start();
+//                break;
+//            case LIFT_UP:
+//                armLift.moveUp();
+//                break;
+//            case THIRD_POSE:
+//                defineThirdServoPoses(hardwareMap);
+//                servoPoseFollower.start();
+//                break;
+//            case LIFT_DOWN:
+//                armLift.moveDown();
+//                defineFourthServoPoses(hardwareMap);
+//                servoPoseFollower.start();
+//                break;
+            case SECOND_PATH:
+                follower.followPath(secondPath);
                 break;
-            case SECOND_POSE:
-                defineSecondServoPoses(hardwareMap); // Define the second servo pose
-                servoPoseFollower.start();
+            case THIRD_PATH:
+                follower.followPath(thirdPath);
                 break;
-            case LIFT_UP:
-                armLift.moveUp();
+            case FOURTH_PATH:
+                follower.followPath(fourthPath);
                 break;
-            case THIRD_POSE:
-                defineThirdServoPoses(hardwareMap);
-                servoPoseFollower.start();
+            case FIFTH_PATH:
+                follower.followPath(fifthPath);
                 break;
-            case LIFT_DOWN:
-                armLift.moveDown();
-                defineFourthServoPoses(hardwareMap);
-                servoPoseFollower.start();
+            case SIXTH_PATH:
+                follower.followPath(sixthPath);
                 break;
-            case PARK_POSE:
-                follower.followPath(parkPath);
+            case SEVENTH_PATH:
+                follower.followPath(seventhPath);
+                break;
+            case EIGHTH_PATH:
+                follower.followPath(eighthPath);
+                break;
+            case NINTH_PATH:
+                follower.followPath(ninthPath);
+                break;
+            case TENTH_PATH:
+                follower.followPath(tenthPath);
                 break;
             case COMPLETE:
                 telemetry.addData("Status", "Autonomous Complete");
@@ -156,66 +226,178 @@ public class ClipParkRight extends OpMode {
                 .addPath(
                         // Line 1
                         new BezierCurve(
-                                new Point(9.000, 84.000, Point.CARTESIAN),
-                                new Point(30.000, 84.000, Point.CARTESIAN),
-                                new Point(17.000, 72.000, Point.CARTESIAN),
-                                new Point(38.500, 72.000, Point.CARTESIAN)
+                                new Point(11.215, 60.336, Point.CARTESIAN),
+                                new Point(26.916, 58.318, Point.CARTESIAN),
+                                new Point(25.794, 74.692, Point.CARTESIAN),
+                                new Point(37.009, 71.551, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
 
     }
-    private PathChain buildParkPath() {
+    private PathChain buildSecondPath() {
         return follower.pathBuilder()
                 .addPath(
-                        // Line 1
+                        // Line 2
                         new BezierCurve(
-                                new Point(38.500, 72.000, Point.CARTESIAN),
-                                new Point(4.000, 76.000, Point.CARTESIAN),
-                                new Point(14.000, 50.000, Point.CARTESIAN),
-                                new Point(10.000, 25.000, Point.CARTESIAN)
+                                new Point(37.009, 71.551, Point.CARTESIAN),
+                                new Point(20.411, 16.374, Point.CARTESIAN),
+                                new Point(67.738, 46.206, Point.CARTESIAN),
+                                new Point(61.907, 28.037, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
+
     }
+    private PathChain buildThirdPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 3
+                        new BezierLine(
+                                new Point(61.907, 28.037, Point.CARTESIAN),
+                                new Point(18.841, 27.589, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+    }
+    private PathChain buildFourthPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 4
+                        new BezierLine(
+                                new Point(18.841, 27.589, Point.CARTESIAN),
+                                new Point(62.131, 28.037, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+    }
+    private PathChain buildFifthPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 5
+                        new BezierCurve(
+                                new Point(62.131, 28.037, Point.CARTESIAN),
+                                new Point(78.953, 13.682, Point.CARTESIAN),
+                                new Point(17.495, 15.477, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+    }
+    private PathChain buildSixthPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 6
+                        new BezierCurve(
+                                new Point(17.495, 15.477, Point.CARTESIAN),
+                                new Point(70.000, 16.000, Point.CARTESIAN),
+                                new Point(65.000, 10.000, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+    }
+    private PathChain buildSeventhPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 7
+                        new BezierLine(
+                                new Point(65.000, 10.000, Point.CARTESIAN),
+                                new Point(18.000, 10.000, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+    }
+    private PathChain buildEighthPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 8
+                        new BezierCurve(
+                                new Point(18.000, 10.000, Point.CARTESIAN),
+                                new Point(27.140, 34.542, Point.CARTESIAN),
+                                new Point(61.907, 28.037, Point.CARTESIAN)
+                        )
+                )
+
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+    }
+    private PathChain buildNinthPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 9
+                        new BezierLine(
+                                new Point(61.907, 28.037, Point.CARTESIAN),
+                                new Point(38.804, 28.262, Point.CARTESIAN)
+                        )
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
+                .build();
+
+    }
+    private PathChain buildTenthPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 10
+                        new BezierLine(
+                                new Point(38.804, 28.262, Point.CARTESIAN),
+                                new Point(10.093, 28.262, Point.CARTESIAN)
+                        )
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+                .build();
+
+    }
+
+
+
 
     // Define the initial servo poses
-    private void defineInitialServoPoses(HardwareMap hardwareMap) {
-        List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.0, 0.0, 0.2, 0.5, 0.65, 1000)
-        );
-        servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
-    }
+//    private void defineInitialServoPoses(HardwareMap hardwareMap) {
+//        List<ServoPose> initialPoses = Arrays.asList(
+//                new ServoPose(0.0, 0.0, 0.2, 0.5, 0.65, 1000)
+//        );
+//        servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
+//    }
 
     // Define the second servo poses
-    private void defineSecondServoPoses(HardwareMap hardwareMap) {
-        List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(0.2, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.4, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.6, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100)
-
-        );
-        servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
-    }
-    // Define the second servo poses
-    private void defineThirdServoPoses(HardwareMap hardwareMap) {
-        List<ServoPose> thirdPoses = Arrays.asList(
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 500),
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.2, 0.6, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.4, 0.8, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 100)
-        );
-        servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);
-    }
-    private void defineFourthServoPoses(HardwareMap hardwareMap) {
-        List<ServoPose> fourthPoses = Arrays.asList(
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 600),
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.2, 1000)
-        );
-        servoPoseFollower = new ServoPoseFollower(hardwareMap, fourthPoses);
-    }
+//    private void defineSecondServoPoses(HardwareMap hardwareMap) {
+//        List<ServoPose> secondPoses = Arrays.asList(
+//                new ServoPose(0.2, 0.0, 0.2, 0.5, 0.65, 100),
+//                new ServoPose(0.4, 0.0, 0.2, 0.5, 0.65, 100),
+//                new ServoPose(0.6, 0.0, 0.2, 0.5, 0.65, 100),
+//                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100)
+//
+//        );
+//        servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
+//    }
+//    // Define the second servo poses
+//    private void defineThirdServoPoses(HardwareMap hardwareMap) {
+//        List<ServoPose> thirdPoses = Arrays.asList(
+//                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 500),
+//                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100),
+//                new ServoPose(0.7, 0.2, 0.6, 0.5, 0.65, 100),
+//                new ServoPose(0.7, 0.4, 0.8, 0.5, 0.65, 100),
+//                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 100)
+//        );
+//        servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);
+//    }
+//    private void defineFourthServoPoses(HardwareMap hardwareMap) {
+//        List<ServoPose> fourthPoses = Arrays.asList(
+//                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 600),
+//                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.2, 1000)
+//        );
+//        servoPoseFollower = new ServoPoseFollower(hardwareMap, fourthPoses);
+//    }
 }
