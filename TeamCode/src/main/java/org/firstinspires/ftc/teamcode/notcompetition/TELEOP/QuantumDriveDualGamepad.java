@@ -81,6 +81,21 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
         int liftInTarget = 0;      // Fully retracted position
         double liftHoldPower = 0.3; // Power to hold the current position
 
+        // Inverse kinematics constants
+        final double MAX_LIFT_HEIGHT = 1.0;  // Max lift servo position
+        final double MIN_LIFT_HEIGHT = 0.0;  // Min lift servo position
+        final double MAX_ARM_ANGLE = 1.0;    // Max arm servo position
+        final double MIN_ARM_ANGLE = 0.0;    // Min arm servo position
+        final double DEADZONE = 0.1;         // Threshold for joystick input
+
+        double liftSpeedMultiplier = 0.01; // Speed of lift adjustments
+        double armSpeedMultiplier = 0.01;  // Speed of arm adjustments
+
+        // Default positions and constants
+        double liftPosition = 0.5; // Default lift position
+        double arm0Position = 0.5; // Default arm0 position
+        double arm1Position = 0.5; // Default arm1 position
+
         // Servo poses for clip on the wall
         double[] clipWall = {0.5105, 0, 0.228, 0.679, 0.65};
         double[] clipBar = {0.692, 0.789, 0.4995, 0.666, 0.35};
@@ -88,7 +103,7 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
         double[] piecePick2 = {0.7, 0, 0.228, 0.679, 0.65};
         int currentLiftPosition1, currentLiftPosition2;
 
-
+        boolean pickingMode = false;  // Flag for gamepiece picking mode
 
         // Main loop: run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -100,6 +115,41 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
             boolean liftIn = gamepad2.left_trigger > 0.1;
             boolean liftUp = gamepad2.right_bumper;
             boolean liftDown = gamepad2.right_trigger > 0.1;
+
+            double liftJoystick = -gamepad2.left_stick_y; // Y-axis for lift (inverted)
+            double armJoystick = gamepad2.left_stick_x;   // X-axis for arm
+            double Sy = gamepad2.right_stick_y;
+            double Sx = -gamepad2.right_stick_x * 1.1;
+
+            if (gamepad2.start) {
+                pickingMode = !pickingMode;
+                sleep(300); // Debounce delay
+            }
+
+            if (pickingMode) {
+                // Adjust lift position based on joystick input
+                if (Math.abs(liftJoystick) > 0.1) { // Deadzone
+                    liftPosition += liftJoystick * liftSpeedMultiplier;
+                }
+
+                // Adjust arm positions to keep claw perpendicular to ground
+                if (Math.abs(armJoystick) > 0.1) { // Deadzone
+                    arm0Position += armJoystick * armSpeedMultiplier;
+                    arm1Position -= armJoystick * armSpeedMultiplier; // Opposite direction for perpendicularity
+                }
+
+                // Constrain positions to valid ranges
+                liftPosition = Math.max(0.0, Math.min(1.0, liftPosition));
+                arm0Position = Math.max(0.0, Math.min(1.0, arm0Position));
+                arm1Position = Math.max(0.0, Math.min(1.0, arm1Position));
+
+                // Set servo positions
+                liftUpServo.setPosition(liftPosition);
+                liftUpLServo.setPosition(liftPosition);
+                arm0Servo.setPosition(arm0Position);
+                arm1Servo.setPosition(arm1Position);
+
+            }
 
             if (gamepad2.dpad_up) {
                 double currentArm0Pos = arm0Servo.getPosition();
@@ -120,7 +170,7 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
                 clawServo.setPosition(0.65);
             } else if (gamepad2.b) {
                 // Extract the piece
-                clawServo.setPosition(0.3);
+                clawServo.setPosition(0.35);
             }
 
             if (gamepad2.x) {
@@ -135,15 +185,15 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
             }
             if (liftUp){
                 double currentLiftPos = liftUpServo.getPosition();
-                liftUpServo.setPosition(currentLiftPos+0.02);
+                liftUpServo.setPosition(currentLiftPos+0.05);
                 double currentLiftPosL = liftUpLServo.getPosition();
-                liftUpLServo.setPosition(currentLiftPosL+0.02);
+                liftUpLServo.setPosition(currentLiftPosL+0.05);
             }
             if (liftDown){
                 double currentLiftPos = liftUpServo.getPosition();
-                liftUpServo.setPosition(currentLiftPos-0.02);
+                liftUpServo.setPosition(currentLiftPos-0.05);
                 double currentLiftPosL = liftUpLServo.getPosition();
-                liftUpLServo.setPosition(currentLiftPosL-0.02);
+                liftUpLServo.setPosition(currentLiftPosL-0.05);
             }
 
             currentLiftPosition1 = armLift1.getCurrentPosition();
@@ -193,51 +243,58 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
                 backLeftMotor.setPower(0);
                 frontRightMotor.setPower(0);
                 backRightMotor.setPower(0);
+            }else if (Math.abs(Sy) > deadzone && Math.abs(Sx) > deadzone) {
+                // Calculate target powers based on gamepad input
+                double denominator = max(Math.abs(Sy) + Math.abs(Sx), 1);
+                frontLeftTargetPower = 1.0*(Sy + Sx) / denominator;
+                backLeftTargetPower = (Sy - Sx) / denominator;
+                frontRightTargetPower = 1.0*(Sy - Sx) / denominator;
+                backRightTargetPower = (Sy + Sx) / denominator;
             } else {
                 // Calculate target powers based on gamepad input
                 double denominator = max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                frontLeftTargetPower = 1.1*(y + x + rx) / denominator;
+                frontLeftTargetPower = 1.0*(y + x + rx) / denominator;
                 backLeftTargetPower = (y - x + rx) / denominator;
-                frontRightTargetPower = 1.1*(y - x - rx) / denominator;
+                frontRightTargetPower = 1.0*(y - x - rx) / denominator;
                 backRightTargetPower = (y + x - rx) / denominator;
             }
 
-            if (gamepad2.right_stick_y > 0.5) {
-                armLift1.setTargetPosition(0); // Initial position is 0
-                armLift1.setPower(1);
-                armLift2.setTargetPosition(0); // Initial position is 0
-                armLift2.setPower(1);
-                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            if (!pickingMode) {
+                if (gamepad2.right_stick_y > 0.5) {
+                    armLift1.setTargetPosition(0); // Initial position is 0
+                    armLift1.setPower(1);
+                    armLift2.setTargetPosition(0); // Initial position is 0
+                    armLift2.setPower(1);
+                    armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-                liftUpServo.setPosition(clipWall[0]);
-                liftUpLServo.setPosition(clipWall[0]);
-                arm0Servo.setPosition(clipWall[1]);
-                arm1Servo.setPosition(clipWall[2]);
-                wristServo.setPosition(clipWall[3]);
-                clawServo.setPosition(clipWall[4]);
+                    liftUpServo.setPosition(clipWall[0]);
+                    liftUpLServo.setPosition(clipWall[0]);
+                    arm0Servo.setPosition(clipWall[1]);
+                    arm1Servo.setPosition(clipWall[2]);
+                    wristServo.setPosition(clipWall[3]);
+                    clawServo.setPosition(clipWall[4]);
 
-            }
-            else if (gamepad2.right_stick_y < - 0.5){
-                liftUpServo.setPosition(clipBar[0]);
-                liftUpLServo.setPosition(clipBar[0]);
-                arm0Servo.setPosition(clipBar[1]);
-                arm1Servo.setPosition(clipBar[2]);
-                wristServo.setPosition(clipBar[3]);
-                clawServo.setPosition(clipBar[4]);
+                } else if (gamepad2.right_stick_y < -0.5) {
+                    liftUpServo.setPosition(clipBar[0]);
+                    liftUpLServo.setPosition(clipBar[0]);
+                    arm0Servo.setPosition(clipBar[1]);
+                    arm1Servo.setPosition(clipBar[2]);
+                    wristServo.setPosition(clipBar[3]);
+                    clawServo.setPosition(clipBar[4]);
 
-            }
-            else if (gamepad2.right_stick_x > 0.5){
-                liftUpServo.setPosition (piecePick1[0]);
-                liftUpLServo.setPosition(piecePick1[0]);
-                arm0Servo.setPosition   (piecePick1[1]);
-                arm1Servo.setPosition   (piecePick1[2]);
-                wristServo.setPosition  (piecePick1[3]);
-                clawServo.setPosition   (piecePick1[4]);
+                } else if (gamepad2.right_stick_x > 0.5) {
+                    liftUpServo.setPosition(piecePick1[0]);
+                    liftUpLServo.setPosition(piecePick1[0]);
+                    arm0Servo.setPosition(piecePick1[1]);
+                    arm1Servo.setPosition(piecePick1[2]);
+                    wristServo.setPosition(piecePick1[3]);
+                    clawServo.setPosition(piecePick1[4]);
 
-            } else if (gamepad2.right_stick_x < -0.5) {
-                liftUpServo.setPosition (piecePick2[0]);
-                liftUpLServo.setPosition(piecePick2[0]);
+                } else if (gamepad2.right_stick_x < -0.5) {
+                    liftUpServo.setPosition(piecePick2[0]);
+                    liftUpLServo.setPosition(piecePick2[0]);
+                }
             }
 
             telemetry.addData("Servo Positions", "----");
