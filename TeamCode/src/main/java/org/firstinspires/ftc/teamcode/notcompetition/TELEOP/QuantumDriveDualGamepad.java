@@ -100,7 +100,7 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
         double[] clipWall = {0.5105, 0, 0.228, 0.679, 0.65};
         double[] clipBar = {0.692, 0.789, 0.4995, 0.666, 0.35};
         double[] piecePick1 = {0.692,0.4, 0.4995, 0.666, 0.35};
-        double[] piecePick2 = {0.7, 0, 0.228, 0.679, 0.65};
+        double[] piecePick2 = {0.7, 0, 0.228, 0.679, 0.35};
         int currentLiftPosition1, currentLiftPosition2;
 
         boolean pickingMode = false;  // Flag for gamepiece picking mode
