@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 
 @Config
-@TeleOp(name = "EnhancedMergedTeleOp")
+//@TeleOp(name = "EnhancedMergedTeleOp")
 public class EnchancedMergedTeleOp extends LinearOpMode {
     // Tuning parameters
     public static double HEADING_kP = 0.04, HEADING_kD = 0.0035;

@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.notcompetition.TELEOP;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,7 +8,6 @@ import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.SensorDigitalTouch;
 
 @TeleOp(name = "QuantumDriveDualGamepad")
 public class QuantumDriveDualGamepad extends LinearOpMode {
@@ -89,11 +85,6 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
-        //reversing
-        //backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        //frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
         // Constants
         int liftOutTarget = -1700; // Maximum extension position
         int liftInTarget = 0;      // Fully retracted position
@@ -115,7 +106,14 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
             boolean liftOut = gamepad2.left_bumper;
             boolean liftIn = gamepad2.left_trigger > 0.1;
             boolean extendOut = gamepad2.right_bumper;
-            boolean extendIn = gamepad2.right_trigger > 0.1;
+            boolean extendIn = gamepad2.right_trigger > 0.2;
+
+            if(Math.abs(y2) > 0.1) {
+                double currentExtendPosR = extendRServo.getPosition();
+                extendRServo.setPosition(currentExtendPosR-0.01*y2);
+                double currentExtendPosL = extendLServo.getPosition();
+                extendLServo.setPosition(currentExtendPosL-0.01*y2);
+            }
 
 
             if (gamepad2.dpad_up) {
@@ -128,12 +126,8 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
 
 
             if (gamepad2.dpad_left) {
-//                double currentWristTPos = wristTServo.getPosition();
-//                wristTServo.setPosition(currentWristTPos+0.01);
                 wristTServo.setPosition(0.5);
             } else if (gamepad2.dpad_right) {
-//                double currentWristTPos = wristTServo.getPosition();
-//                wristTServo.setPosition(currentWristTPos-0.01);
                 wristTServo.setPosition(0.0);
             }
 
@@ -166,7 +160,7 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
                     sleep(200); // Wait for claw to fully close
 
 
-                    armBPosition = 1;
+                    armBPosition = 0.15;
                     armBServo.setPosition(armBPosition);
                 } else {
                     // Open the claw
@@ -174,7 +168,7 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
                 }
             }
 
-// Update the button press state to avoid repeated toggling
+            // Update the button press state to avoid repeated toggling
             bWasPressed = gamepad2.b;
 
 
@@ -220,26 +214,26 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
             }
 
 
-            if (gamepad2.dpad_left) {
-                // Wait a small amount of time to avoid button spamming
-                sleep(200);  // Adjust the sleep time if needed
-
-                // Increment position state, looping back to 0 when reaching 3
-                wristTPositionState = (wristTPositionState + 1) % 3;
-
-                // Set wristB position based on current state
-                switch (wristTPositionState) {
-                    case 0: // Starting position (0 degrees)
-                        wristTServo.setPosition(0.5);  // Adjust this value for the starting position
-                        break;
-                    case 1: // 45 degrees left
-                        wristTServo.setPosition(0.35);  // Adjust this value for 45 degrees to the left
-                        break;
-                    case 2: // 45 degrees right
-                        wristTServo.setPosition(0.65);  // Adjust this value for 45 degrees to the right
-                        break;
-                }
-            }
+//            if (gamepad2.dpad_left) {
+//                // Wait a small amount of time to avoid button spamming
+//                sleep(200);  // Adjust the sleep time if needed
+//
+//                // Increment position state, looping back to 0 when reaching 3
+//                wristTPositionState = (wristTPositionState + 1) % 3;
+//
+//                // Set wristB position based on current state
+//                switch (wristTPositionState) {
+//                    case 0: // Starting position (0 degrees)
+//                        wristTServo.setPosition(0.5);  // Adjust this value for the starting position
+//                        break;
+//                    case 1: // 45 degrees left
+//                        wristTServo.setPosition(0.35);  // Adjust this value for 45 degrees to the left
+//                        break;
+//                    case 2: // 45 degrees right
+//                        wristTServo.setPosition(0.65);  // Adjust this value for 45 degrees to the right
+//                        break;
+//                }
+//            }
 
 
             if (extendOut){
@@ -303,21 +297,11 @@ public class QuantumDriveDualGamepad extends LinearOpMode {
                 frontRightMotor.setPower(0);
                 backRightMotor.setPower(0);
             }
-//            else if (Math.abs(Sy) > deadzone || Math.abs(Sx) > deadzone) {
-//                // Handle forward/backward and strafing
-//                double denominator = Math.max(Math.abs(Sy) + Math.abs(Sx), 1);
-//
-////                // Correct diagonal motor powers for strafing
-////                frontLeftTargetPower = (Sy + Sx) / denominator;
-////                backLeftTargetPower = (Sy - Sx) / denominator;
-////                frontRightTargetPower = (Sy - Sx) / denominator;
-////                backRightTargetPower = (Sy + Sx) / denominator;
-//            }
             else {
                 // Separate the logic for strafing (x) and turning (rx)
                 double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx) + Math.abs(x2), 1);
 
-// Corrected motor power calculations
+                // Corrected motor power calculations
                 frontLeftTargetPower = (y + x + rx + x2) / denominator;
                 backLeftTargetPower = (y - x + rx - x2) / denominator;
                 frontRightTargetPower = (y - x - rx - x2) / denominator;

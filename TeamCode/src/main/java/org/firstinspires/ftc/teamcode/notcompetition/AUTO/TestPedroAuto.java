@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.util.Timer;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "TestPedroAuto", group = "Autonomous")
+//@Autonomous(name = "TestPedroAuto", group = "Autonomous")
 public class TestPedroAuto extends OpMode {
 
     private enum AutoState {

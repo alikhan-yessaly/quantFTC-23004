@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.utils.ArmLift;
 
-@TeleOp(name = "ArmLiftTest")
+//@TeleOp(name = "ArmLiftTest")
 public class ArmLiftTest extends LinearOpMode {
 
     private ArmLift armLift;

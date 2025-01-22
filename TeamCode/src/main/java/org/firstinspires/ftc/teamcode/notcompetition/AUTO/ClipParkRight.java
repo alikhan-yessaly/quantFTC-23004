@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.utils.ServoPoseFollower;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "ClipParkRight", group = "Autonomous")
+//@Autonomous(name = "ClipParkRight", group = "Autonomous")
 public class ClipParkRight extends OpMode {
 
     private enum AutoState {

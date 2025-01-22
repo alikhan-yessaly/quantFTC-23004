@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.utils.ServoPoseFollower;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "AutoPathing", group = "Autonomous")
+//@Autonomous(name = "AutoPathing", group = "Autonomous")
 public class AutoPathing extends OpMode {
 
     private enum AutoState {

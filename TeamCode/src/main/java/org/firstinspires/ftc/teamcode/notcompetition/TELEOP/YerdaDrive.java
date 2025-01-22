@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @Config
-@TeleOp
+//@TeleOp
 public class YerdaDrive extends LinearOpMode {
     // Declare your motors and other class member variables here
     public static double HEADING_kP = 0.04, HEADING_kD = 0.0035;

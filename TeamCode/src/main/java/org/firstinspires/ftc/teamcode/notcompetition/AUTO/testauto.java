@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.utils.ServoPoseFollower;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "testauto", group = "Autonomous")
+//@Autonomous(name = "testauto", group = "Autonomous")
 public class testauto extends OpMode {
     private enum AutoState {
         INITIALIZE, FIRST_PATH, FIRST_POSE, SECOND_POSE, LIFT_UP, THIRD_POSE, PARK_PATH ,LIFT_DOWN, PARK_POSE, SECOND_PATH , THIRD_PATH , FOURTH_PATH , FIFTH_PATH , SIXTH_PATH , SEVENTH_PATH , COMPLETE
