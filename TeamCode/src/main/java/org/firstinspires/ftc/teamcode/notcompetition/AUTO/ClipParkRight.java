@@ -38,7 +38,7 @@ public class ClipParkRight extends OpMode {
     private PathChain firstPath, secondPath, thirdPath, fourthForwardPath, fourthBackwardPath,
             fifthPath, sixthForwardPath, sixthBackwardPath, seventhPath, eighthForwardPath, eighthBackwardPath;
 
-    private static final Pose START_POSE = new Pose(11.215, 60.336, Math.toRadians(180)); // Verify actual starting heading
+    private static final Pose START_POSE = new Pose(11.215, 60.336, Math.toRadians(0)); // Verify actual starting heading
 
 
     @Override
@@ -98,7 +98,7 @@ public class ClipParkRight extends OpMode {
 
         switch (currentState) {
             case FIRST_PATH:
-                if (follower.isCloseEnoughToEnd()) setState(AutoState.FIRST_POSE);
+                if (follower.isCloseEnoughToEnd()) setState(AutoState.SECOND_PATH);
                 break;
 //            case FIRST_POSE:
 //                if (servoPoseFollower.isComplete()) setState(AutoState.SECOND_POSE);
@@ -143,11 +143,11 @@ public class ClipParkRight extends OpMode {
                 if (follower.isCloseEnoughToEnd()) setState(AutoState.EIGHTH_BACKWARD);
                 break;
             case EIGHTH_BACKWARD:
-                if (follower.isCloseEnoughToEnd()) setState(AutoState.PARK_POSE);
-                break;
-            case PARK_POSE:
                 if (follower.isCloseEnoughToEnd()) setState(AutoState.COMPLETE);
                 break;
+//            case PARK_POSE:
+//                if (follower.isCloseEnoughToEnd()) setState(AutoState.COMPLETE);
+//                break;
             case COMPLETE:
                 telemetry.addData("Status", "Sequence Complete");
                 break;
@@ -216,7 +216,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(37.009, 71.551, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -230,7 +230,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(61.907, 28.037, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -242,7 +242,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(17.271, 28.486, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -254,7 +254,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(62.131, 28.037, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -267,7 +267,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(17.495, 15.477, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -280,7 +280,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(65.000, 10.000, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -292,7 +292,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(18.000, 10.000, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -305,7 +305,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(61.907, 28.037, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -317,7 +317,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(38.804, 28.262, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -329,7 +329,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(10.093, 28.262, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
@@ -342,7 +342,7 @@ public class ClipParkRight extends OpMode {
                                 new Point(37.682, 72.000, Point.CARTESIAN)
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
