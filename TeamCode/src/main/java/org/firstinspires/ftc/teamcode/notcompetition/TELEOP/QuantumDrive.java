@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 
-@TeleOp(name = "QuantumDriveDualGamepad")
-public class QuantumDriveDualGamepad extends LinearOpMode {
+@TeleOp(name = "QuantumDrive")
+public class QuantumDrive extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("leftFront");
