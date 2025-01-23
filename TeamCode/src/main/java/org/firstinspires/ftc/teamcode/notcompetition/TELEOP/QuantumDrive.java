@@ -47,6 +47,9 @@ public class QuantumDrive extends LinearOpMode {
         boolean bWasPressed = false;
         boolean aWasPressed = false;
         boolean armBButtonPressed = false;
+        boolean modeEnabled = false;
+        boolean modeButtonPressed = false;
+        boolean dpadUpIsPressed = false;
 
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -70,9 +73,9 @@ public class QuantumDrive extends LinearOpMode {
         double backLeftTargetPower;
         double frontRightTargetPower;
         double backRightTargetPower;
-        double armBPosition = 0.15;;
+        double armBPosition = 0.2;;
         int wristBPositionState = 0;
-        int wristTPositionState = 0;
+
 
         double deadzone = 0.1; // Adjust this value for the deadzone of the joysticks
 
@@ -86,18 +89,26 @@ public class QuantumDrive extends LinearOpMode {
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Constants
-        int liftOutTarget = -1700; // Maximum extension position
+        int liftOutTarget = -1900; // Maximum extension position
         int liftInTarget = 0;      // Fully retracted position
         double liftHoldPower = 0.3; // Power to hold the current position
 
         int currentLiftPosition1, currentLiftPosition2;
 
+        clawTServo.setPosition(0.35);
+        clawBServo.setPosition(0.35);
+        armTServo.setPosition(0.25);
+        extendLServo.setPosition(0.25);
+        extendRServo.setPosition(0.25);
+        wristBServo.setPosition(0.55);
+        wristTServo.setPosition(0.5);
+
 
         // Main loop: run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            double y = gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x * 1.1;
-            double rx = -gamepad1.right_stick_x;
+            double y = gamepad1.left_stick_y * 0.85;
+            double x = (gamepad1.left_stick_x * 1.1) * 0.85;
+            double rx = (-gamepad1.right_stick_x) * 0.85;
 
             double y2 = gamepad2.left_stick_y;
             double x2 = gamepad2.left_stick_x * 0.5;
@@ -116,14 +127,35 @@ public class QuantumDrive extends LinearOpMode {
             }
 
 
-            if (gamepad2.dpad_up) {
-                double currentArmTPos = armTServo.getPosition();
-                armTServo.setPosition(currentArmTPos+0.01);
-            } else if (gamepad2.dpad_down) {
-                double currentArmTPos = armTServo.getPosition();
-                armTServo.setPosition(currentArmTPos-0.01);
+
+            if(gamepad2.guide && !modeButtonPressed){
+                modeEnabled = !modeEnabled;
+
+                modeButtonPressed = true;
+            } else if(!gamepad2.guide){
+                modeButtonPressed = false;
             }
 
+            if(modeEnabled){
+                if(gamepad2.dpad_up && !dpadUpIsPressed){
+
+
+                }
+                else if(gamepad2.dpad_down){
+                    armTServo.setPosition(0.88);
+                    wristTServo.setPosition(0.5);
+                }
+                dpadUpIsPressed = gamepad2.dpad_up;
+            }
+            else {
+                if (gamepad2.dpad_up) {
+                    double currentArmTPos = armTServo.getPosition();
+                    armTServo.setPosition(currentArmTPos+0.01);
+                } else if (gamepad2.dpad_down) {
+                    double currentArmTPos = armTServo.getPosition();
+                    armTServo.setPosition(currentArmTPos-0.01);
+                }
+            }
 
             if (gamepad2.dpad_left) {
                 wristTServo.setPosition(0.5);
@@ -135,7 +167,7 @@ public class QuantumDrive extends LinearOpMode {
                 clawTclosed = !clawTclosed;
                 if (clawTclosed) {
                     clawTServo.setPosition(0.65);
-                    clawBServo.setPosition(0.35);
+//                    clawBServo.setPosition(0.35);
                 } else {
                     clawTServo.setPosition(0.35);
                 }
@@ -159,9 +191,10 @@ public class QuantumDrive extends LinearOpMode {
                     clawBServo.setPosition(0.65); // Close claw
                     sleep(200); // Wait for claw to fully close
 
-
-                    armBPosition = 0.15;
-                    armBServo.setPosition(armBPosition);
+                    if (armBPosition==0) {
+                        armBPosition = 0.15;
+                        armBServo.setPosition(armBPosition);
+                    }
                 } else {
                     // Open the claw
                     clawBServo.setPosition(0.35);
@@ -176,6 +209,13 @@ public class QuantumDrive extends LinearOpMode {
                 // Cycle through positions when button is pressed
                 if (armBPosition == 0.15) {
                     armBPosition = 1; // Move to transfer position++
+                    wristBServo.setPosition(0.5);
+                    wristTServo.setPosition(0.5);
+                    armTServo.setPosition(0.1495);
+                    clawBServo.setPosition(0.65);
+                    clawTServo.setPosition(0.65);
+                    extendLServo.setPosition(0.25);
+                    extendRServo.setPosition(0.25);
                 } else {
                     armBPosition = 0.15; // Move back to starting position
                 }
@@ -196,19 +236,21 @@ public class QuantumDrive extends LinearOpMode {
                 sleep(200);  // Adjust the sleep time if needed
 
                 // Increment position state, looping back to 0 when reaching 3
-                wristBPositionState = (wristBPositionState + 1) % 3;
+                wristBPositionState = (wristBPositionState + 1) % 4;
 
                 // Set wristB position based on current state
                 switch (wristBPositionState) {
                     case 0: // Starting position (0 degrees)
-                        wristBServo.setPosition(0.55);  // Adjust this value for the starting position
-                        wristTServo.setPosition(0.5);
+                        wristBServo.setPosition(0.5);  // Adjust this value for the starting position
                         break;
                     case 1: // 45 degrees left
-                        wristBServo.setPosition(0.35);  // Adjust this value for 45 degrees to the left
+                        wristBServo.setPosition(0.3);  // Adjust this value for 45 degrees to the left
                         break;
                     case 2: // 45 degrees right
-                        wristBServo.setPosition(0.75);  // Adjust this value for 45 degrees to the right
+                        wristBServo.setPosition(0.7);  // Adjust this value for 45 degrees to the right
+                        break;
+                    case 3: // 45 degrees right
+                        wristBServo.setPosition(0.85);  // Adjust this value for 45 degrees to the right
                         break;
                 }
             }
