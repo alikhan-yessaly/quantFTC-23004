@@ -4,8 +4,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.PwmControl;
 
+import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
+
 public class Wrist {
-    private final ServoImplEx wristServo;
+    private final ServoImplEx wristBServo;
+    private final ServoImplEx wristTServo;
 
     // Define the preset positions
     private static final double POSITION_1 = 0; // Adjust these values as needed
@@ -15,13 +18,14 @@ public class Wrist {
     private int positionIndex = 0; // Tracks the current position in the cycle
 
     public Wrist(HardwareMap hardwareMap) {
-        wristServo = hardwareMap.get(ServoImplEx.class, "wrist");
+        wristBServo = hardwareMap.get(ServoImplEx.class, "wristB");
+        wristTServo = hardwareMap.get(ServoImplEx.class, "wristT");
 
      /*   PwmControl.PwmRange pwmRange = new PwmControl.PwmRange(500, 2500);*/
       /*  wristServo.setPwmRange(pwmRange);*/
 
         // Initialize to the first position
-        setPosition(POSITION_1);
+        setPosition(POSITION_1, POSITION_1);
     }
 
     // Method to cycle through positions
@@ -29,22 +33,27 @@ public class Wrist {
         positionIndex = (positionIndex + 1) % 3; // Cycle between 0, 1, and 2
         switch (positionIndex) {
             case 0:
-                setPosition(POSITION_1);
+                setPosition(POSITION_1, POSITION_1);
                 break;
             case 1:
-                setPosition(POSITION_2);
+                setPosition(POSITION_2, POSITION_2);
                 break;
             case 2:
-                setPosition(POSITION_3);
+                setPosition(POSITION_3, POSITION_3);
                 break;
         }
     }
 
-    public void setPosition(double position) {
-        wristServo.setPosition(position);
+    public void setPosition(double wristBPosition, double wristTPosition) {
+        wristBServo.setPosition(wristBPosition);
+        wristTServo.setPosition(wristTPosition);
     }
 
-    public double getPosition() {
-        return wristServo.getPosition();
+    public double getWristBPosition() {
+        return wristBServo.getPosition();
+    }
+
+    public double getWristTPosition() {
+        return wristTServo.getPosition();
     }
 }

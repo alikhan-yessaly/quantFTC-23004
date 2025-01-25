@@ -179,7 +179,7 @@ public class TestPedroAuto extends OpMode {
     }
     private void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.0, 0.0, 0.3, 0.5, 0.65, 1000)
+               // new ServoPose(0.0, 0.0, 0.3, 0.5, 0.65, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
@@ -326,10 +326,10 @@ public class TestPedroAuto extends OpMode {
     // Define the second servo poses
     private void defineSecondServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(0.2, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.4, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.6, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100)
+//                new ServoPose(0.2, 0.0, 0.2, 0.5, 0.65, 100),
+//                new ServoPose(0.4, 0.0, 0.2, 0.5, 0.65, 100),
+//                new ServoPose(0.6, 0.0, 0.2, 0.5, 0.65, 100),
+//                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100)
 
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
@@ -337,18 +337,20 @@ public class TestPedroAuto extends OpMode {
     // Define the second servo poses
     private void defineThirdServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> thirdPoses = Arrays.asList(
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 500),
-                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.2, 0.6, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.4, 0.8, 0.5, 0.65, 100),
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 100)
+//                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 500),
+//                new ServoPose(0.7, 0.0, 0.2, 0.5, 0.65, 100),
+//                new ServoPose(0.7, 0.2, 0.6, 0.5, 0.65, 100),
+//                new ServoPose(0.7, 0.4, 0.8, 0.5, 0.65, 100),
+//                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 100)
+//
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);
     }
     private void defineFourthServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> fourthPoses = Arrays.asList(
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 600),
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.2, 1000)
+//                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 600),
+//                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.2, 1000)
+//
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, fourthPoses);
     }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ServoPoseFollower {
 
-    private final LiftUp liftUp;
+    private final Extender extender;
     private final Arm arm;
     private final Wrist wrist;
     private final Claw claw;
@@ -18,7 +18,7 @@ public class ServoPoseFollower {
     private boolean isComplete = false;
 
     public ServoPoseFollower(HardwareMap hardwareMap, List<ServoPose> poses) {
-        this.liftUp = new LiftUp(hardwareMap);
+        this.extender = new Extender(hardwareMap);
         this.arm = new Arm(hardwareMap);
         this.wrist = new Wrist(hardwareMap);
         this.claw = new Claw(hardwareMap);
@@ -58,10 +58,10 @@ public class ServoPoseFollower {
 
     // Apply the servo positions for the given pose
     private void applyPose(ServoPose pose) {
-        liftUp.setPosition(pose.getLiftUpPosition());
-        arm.setPosition(pose.getArm0Position(), pose.getArm1Position());
-        wrist.setPosition(pose.getWristPosition());
-        claw.setPosition(pose.getClawPosition());
+        extender.setPosition(pose.getExtenderPosition());
+        arm.setPosition(pose.getArmBPosition(), pose.getArmTPosition());
+        wrist.setPosition(pose.getWristBPosition(), pose.getWristTPosition());
+        claw.setPosition(pose.getClawBPosition(), pose.getClawTPosition());
     }
 
     // Check if the current pose sequence is complete

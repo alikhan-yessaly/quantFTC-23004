@@ -17,7 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 
 //@Autonomous(name = "AutoPathing", group = "Autonomous")
-public class AutoPathing extends OpMode {
+public class
+AutoPathing extends OpMode {
 
     private enum AutoState {
         FIRST_PATH, SECOND_PATH, THIRD_PATH, FOURTH_FORWARD, FOURTH_BACKWARD, FIFTH_PATH, SIXTH_FORWARD, SIXTH_BACKWARD, SEVENTH_PATH, EIGHTH_FORWARD, EIGHTH_BACKWARD, COMPLETE
@@ -202,7 +203,7 @@ public class AutoPathing extends OpMode {
     }
     private void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.0, 0.0, 0.3, 0.5, 0.65, 1000)
+             //   new ServoPose(0.0, 0.0, 0.3, 0.5, 0.65, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }

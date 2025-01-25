@@ -302,7 +302,7 @@ public class testauto extends OpMode {
     // Define the initial servo poses
     private void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.692, 0.789, 0.4995, 0.666, 0.35, 1000)
+                //new ServoPose(0.692, 0.789, 0.4995, 0.666, 0.35, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
@@ -310,8 +310,8 @@ public class testauto extends OpMode {
     // Define the second servo poses
     private void defineSecondServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(0.692,0.4, 0.4995, 0.666, 0.35, 1000),
-                new ServoPose(0.5105, 0, 0.228, 0.679, 0.65, 500)
+                //new ServoPose(0.692,0.4, 0.4995, 0.666, 0.35, 1000),
+                //new ServoPose(0.5105, 0, 0.228, 0.679, 0.65, 500)
 
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
@@ -319,15 +319,15 @@ public class testauto extends OpMode {
     // Define the second servo poses
     private void defineThirdServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> thirdPoses = Arrays.asList(
-                new ServoPose(0.5105, 0, 0.228, 0.679, 0.35, 500),
-                new ServoPose(0.7, 0, 0.228, 0.679, 0.35, 100)
+                //new ServoPose(0.5105, 0, 0.228, 0.679, 0.35, 500),
+                //new ServoPose(0.7, 0, 0.228, 0.679, 0.35, 100)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);
     }
     private void defineFourthServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> fourthPoses = Arrays.asList(
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 600),
-                new ServoPose(0.7, 0.6, 1.0, 0.5, 0.2, 1000)
+                //new ServoPose(0.7, 0.6, 1.0, 0.5, 0.65, 600),
+                //new ServoPose(0.7, 0.6, 1.0, 0.5, 0.2, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, fourthPoses);
     }

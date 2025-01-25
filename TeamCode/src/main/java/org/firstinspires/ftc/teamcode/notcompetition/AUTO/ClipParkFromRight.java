@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.utils.ServoPoseFollower;
 import java.util.Arrays;
 import java.util.List;
 
-//@Autonomous(name = "ClipParkFromRight", group = "Autonomous")
+@Autonomous(name = "ClipParkFromRight", group = "Autonomous")
 public class ClipParkFromRight extends OpMode {
 
     private enum AutoState {
@@ -128,8 +128,8 @@ public class ClipParkFromRight extends OpMode {
             case THIRD_PATH:
                 if (follower.isCloseEnoughToEnd()) setState(AutoState.COMPLETE);
                 break;
-//            case FOURTH_FORWARD:
-//                if (follower.isCloseEnoughToEnd()) setState(AutoState.FOURTH_BACKWARD);
+            case FOURTH_FORWARD:
+                if (follower.isCloseEnoughToEnd()) setState(AutoState.FOURTH_BACKWARD);
 //                break;
 //            case FOURTH_BACKWARD:
 //                if (follower.isCloseEnoughToEnd()) setState(AutoState.FIFTH_PATH);
@@ -211,7 +211,7 @@ public class ClipParkFromRight extends OpMode {
 
     private PathChain buildThirdPath() {
         return follower.pathBuilder()
-                .addPath( new BezierLine(
+                .addPath(new BezierLine(
                         new Point(61.009, 23.551, Point.CARTESIAN),
                         new Point(17.944, 24.000, Point.CARTESIAN)
                 ))
@@ -284,7 +284,7 @@ public class ClipParkFromRight extends OpMode {
 
     private void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> poses = Arrays.asList(
-                new ServoPose(0.0, 0.0, 0.3, 0.5, 0.65, 1000)
+               // new ServoPose(0.0, 0.0, 0.3, 0.5, 0.65, 1000)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, poses);
     }

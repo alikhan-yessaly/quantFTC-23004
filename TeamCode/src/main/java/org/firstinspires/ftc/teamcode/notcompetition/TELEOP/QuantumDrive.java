@@ -5,12 +5,19 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 
+import org.firstinspires.ftc.robotcontroller.external.samples.SampleRevBlinkinLedDriver;
+import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
+
+
 @TeleOp(name = "QuantumDrive")
 public class QuantumDrive extends LinearOpMode {
+/*    private Follower follower;*/
+
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("leftFront");
@@ -21,6 +28,8 @@ public class QuantumDrive extends LinearOpMode {
         DcMotor armLift2 = hardwareMap.dcMotor.get("lift2");
 
         TouchSensor touch = hardwareMap.touchSensor.get("touch");
+
+//        follower = new Follower(hardwareMap);
 
         ServoImplEx clawTServo = (ServoImplEx)hardwareMap.servo.get("clawT");
         ServoImplEx clawBServo = (ServoImplEx)hardwareMap.servo.get("clawB");
@@ -50,6 +59,10 @@ public class QuantumDrive extends LinearOpMode {
         boolean modeEnabled = false;
         boolean modeButtonPressed = false;
         boolean dpadUpIsPressed = false;
+        boolean transferPiece = false;
+        boolean transferStarted = false;
+        boolean liftFall = false;
+        int transferPos = -500;
 
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -75,6 +88,8 @@ public class QuantumDrive extends LinearOpMode {
         double backRightTargetPower;
         double armBPosition = 0.2;;
         int wristBPositionState = 0;
+        int targetPosition = 0;
+
 
 
         double deadzone = 0.1; // Adjust this value for the deadzone of the joysticks
@@ -88,10 +103,13 @@ public class QuantumDrive extends LinearOpMode {
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        armBServo.setDirection(Servo.Direction.REVERSE);
+
+
         // Constants
         int liftOutTarget = -1900; // Maximum extension position
         int liftInTarget = 0;      // Fully retracted position
-        double liftHoldPower = 0.3; // Power to hold the current position
+        double liftHoldPower = 0.5; // Power to hold the current position
 
         int currentLiftPosition1, currentLiftPosition2;
 
@@ -101,7 +119,7 @@ public class QuantumDrive extends LinearOpMode {
         extendLServo.setPosition(0.25);
         extendRServo.setPosition(0.25);
         wristBServo.setPosition(0.55);
-        wristTServo.setPosition(0.5);
+        wristTServo.setPosition(0.3);
 
 
         // Main loop: run until the end of the match (driver presses STOP)
@@ -112,6 +130,9 @@ public class QuantumDrive extends LinearOpMode {
 
             double y2 = gamepad2.left_stick_y;
             double x2 = gamepad2.left_stick_x * 0.5;
+
+           /* follower.update();*/
+
 
             // dn
             boolean liftOut = gamepad2.left_bumper;
@@ -130,7 +151,6 @@ public class QuantumDrive extends LinearOpMode {
 
             if(gamepad2.guide && !modeButtonPressed){
                 modeEnabled = !modeEnabled;
-
                 modeButtonPressed = true;
             } else if(!gamepad2.guide){
                 modeButtonPressed = false;
@@ -138,12 +158,21 @@ public class QuantumDrive extends LinearOpMode {
 
             if(modeEnabled){
                 if(gamepad2.dpad_up && !dpadUpIsPressed){
+                    while(armLift1.getCurrentPosition() > -1300 && armLift2.getCurrentPosition() > -1300){
+                        armLift1.setTargetPosition(targetPosition);
+                        armLift2.setTargetPosition(targetPosition);
+                        armLift1.setPower(1);
+                        armLift2.setPower(1);
+                        armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        targetPosition -= 50;
+                    }
 
 
                 }
                 else if(gamepad2.dpad_down){
                     armTServo.setPosition(0.88);
-                    wristTServo.setPosition(0.5);
+                    wristTServo.setPosition(0.3);
                 }
                 dpadUpIsPressed = gamepad2.dpad_up;
             }
@@ -160,7 +189,7 @@ public class QuantumDrive extends LinearOpMode {
             if (gamepad2.dpad_left) {
                 wristTServo.setPosition(0.5);
             } else if (gamepad2.dpad_right) {
-                wristTServo.setPosition(0.0);
+                wristTServo.setPosition(1);
             }
 
             if (gamepad2.a && !aWasPressed) {
@@ -181,7 +210,7 @@ public class QuantumDrive extends LinearOpMode {
 
                 if (clawBclosed) {
                     // If the claw is closing and armBPosition is 0.15, lower the arm
-                    if (armBPosition == 0.15) {
+                    if (armBPosition == 0.22) {
                         armBPosition = 0; // Lower arm
                         armBServo.setPosition(armBPosition); // Apply new arm position
                         sleep(200); // Wait for the arm to lower
@@ -192,7 +221,7 @@ public class QuantumDrive extends LinearOpMode {
                     sleep(200); // Wait for claw to fully close
 
                     if (armBPosition==0) {
-                        armBPosition = 0.15;
+                        armBPosition = 0.22;
                         armBServo.setPosition(armBPosition);
                     }
                 } else {
@@ -206,18 +235,25 @@ public class QuantumDrive extends LinearOpMode {
 
 
             if (gamepad2.y && !armBButtonPressed) {
+                transferStarted = false;
                 // Cycle through positions when button is pressed
-                if (armBPosition == 0.15) {
-                    armBPosition = 1; // Move to transfer position++
+                if (armBPosition == 0.22) {
+                    armBPosition = 1; // Move to transfer position+
+                    if(!transferStarted) {
+                        transferPiece = true;
+                    }
                     wristBServo.setPosition(0.5);
-                    wristTServo.setPosition(0.5);
-                    armTServo.setPosition(0.1495);
+                    wristTServo.setPosition(0.3);
+                    armTServo.setPosition(0.16);
                     clawBServo.setPosition(0.65);
-                    clawTServo.setPosition(0.65);
+
+                    clawTServo.setPosition(0.35);
                     extendLServo.setPosition(0.25);
                     extendRServo.setPosition(0.25);
+
                 } else {
-                    armBPosition = 0.15; // Move back to starting position
+                    transferPiece = false;
+                    armBPosition = 0.22; // Move back to starting position
                 }
 
                 // Update the button press state to avoid multiple triggers
@@ -303,6 +339,7 @@ public class QuantumDrive extends LinearOpMode {
                 armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             } else if (liftIn && !touch.isPressed()) {
+                transferStarted = true;
                 // Run motors to bottom position unless touch sensor is pressed
                 armLift1.setTargetPosition(liftInTarget);
                 armLift2.setTargetPosition(liftInTarget);
@@ -310,8 +347,24 @@ public class QuantumDrive extends LinearOpMode {
                 armLift2.setPower(1);
                 armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            } else {
+            } else if(transferPiece && !transferStarted) {
                 // Hold current position
+                if(currentLiftPosition1>-170){
+                    armLift1.setPower(0);
+                    armLift2.setPower(0);
+                }
+                else{
+                    armLift1.setPower(1);
+                    armLift2.setPower(1);
+                }
+                armLift1.setTargetPosition(transferPos);
+                armLift2.setTargetPosition(transferPos);
+                armLift1.setPower(1);
+                armLift2.setPower(1);
+                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+            else {
                 armLift1.setTargetPosition(currentLiftPosition1);
                 armLift2.setTargetPosition(currentLiftPosition2);
                 armLift1.setPower(liftHoldPower);
@@ -351,7 +404,6 @@ public class QuantumDrive extends LinearOpMode {
             }
 
 
-
             telemetry.addData("Servo Positions", "----");
             telemetry.addData("Lift1 Position", currentLiftPosition1);
             telemetry.addData("Lift2 Position", currentLiftPosition2);
@@ -367,9 +419,11 @@ public class QuantumDrive extends LinearOpMode {
             telemetry.addData("Back Right Power", backRightTargetPower);
             telemetry.addData("extendL", extendLServo.getPosition());
             telemetry.addData("extendR", extendRServo.getPosition());
+//            telemetry.addData("X", follower.getPose().getX());
+//            telemetry.addData("Y", follower.getPose().getY());
+//            telemetry.addData(" Heading", follower.getPose().getHeading());
             telemetry.update();
 
-            telemetry.update();
 
             // Ramp up motor powers towards target powers
             frontLeftPower += rampUpRate * (frontLeftTargetPower - frontLeftPower);

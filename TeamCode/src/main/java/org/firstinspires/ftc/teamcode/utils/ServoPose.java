@@ -1,27 +1,33 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 public class ServoPose {
-    private final double liftUpPosition;
-    private final double arm0Position;
-    private final double arm1Position;
-    private final double wristPosition;
-    private final double clawPosition;
+    private final double clawT;
+    private final double clawB;
+    private final double wristB;
+    private final double wristT;
+    private final double armB;
+    private final double armT;
+    private final double extender;
     private final long duration;
 
-    public ServoPose(double liftUpPosition, double arm0Position, double arm1Position, double wristPosition, double clawPosition, long duration) {
-        this.liftUpPosition = liftUpPosition;
-        this.arm0Position = arm0Position;
-        this.arm1Position = arm1Position;
-        this.wristPosition = wristPosition;
-        this.clawPosition = clawPosition;
-        this.duration = duration; // Duration in milliseconds
+    public ServoPose(double clawT, double clawB, double wristB, double wristT, double armB, double armT, double extender, long duration) {
+        this.clawB = clawB;
+        this.clawT = clawT;
+        this.wristB = wristB;
+        this.wristT = wristT;
+        this.armB = armB;
+        this.armT = armT;
+        this.extender = extender;
+        this.duration = duration;// Duration in milliseconds
     }
 
-    public double getLiftUpPosition() { return liftUpPosition; }
-    public double getArm0Position() { return arm0Position; }
-    public double getArm1Position() { return arm1Position; }
-    public double getWristPosition() { return wristPosition; }
-    public double getClawPosition() { return clawPosition; }
+    public double getArmBPosition() { return armB; }
+    public double getArmTPosition() { return armT; }
+    public double getWristBPosition() { return wristB; }
+    public double getWristTPosition() { return wristT; }
+    public double getClawBPosition() { return clawB;  }
+    public double getClawTPosition() { return clawT; }
+    public double getExtenderPosition() { return extender; }
     public long getDuration() { return duration; }
 }
 
