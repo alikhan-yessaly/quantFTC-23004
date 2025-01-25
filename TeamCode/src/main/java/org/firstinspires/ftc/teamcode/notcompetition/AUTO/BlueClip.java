@@ -43,7 +43,7 @@ public class BlueClip extends OpMode{
         follower.setStartingPose(START_POSE);
 
         armLift = new ArmLift(hardwareMap);
-        armLift.moveDown();
+        armLift.moveClipUp();
 
         defineInitialServoPoses(hardwareMap);
         servoPoseFollower.start();
@@ -109,7 +109,7 @@ public class BlueClip extends OpMode{
                         // Line 1
                         new BezierLine(
                                 new Point(9.000, 58.000, Point.CARTESIAN),
-                                new Point(36.000, 58.000, Point.CARTESIAN)
+                                new Point(30.000, 58.000, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180))

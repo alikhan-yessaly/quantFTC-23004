@@ -12,6 +12,8 @@ public class ArmLift {
     private static final int UP_POSITION = 1300;
     private static final int POSITION_TOLERANCE = 50;  // Tolerance for "close enough" to target position
     private static final double MAX_POWER = 1.0;
+    private static final int CLIP_UP_POSITION = 1700;
+    private static final int CLIP_DOWN_POSITION = 1200;
 
     public ArmLift(HardwareMap hardwareMap) {
         armLift1 = hardwareMap.dcMotor.get("lift1");
@@ -40,6 +42,15 @@ public class ArmLift {
     // Move the arm lift all the way down
     public void moveDown() {
         setPosition(DOWN_POSITION);
+    }
+
+
+    public void moveClipUp() {
+        setPosition(CLIP_UP_POSITION);
+    }
+
+    public void moveClipDown() {
+        setPosition(CLIP_DOWN_POSITION);
     }
 
     // Move the arm lift all the way up
