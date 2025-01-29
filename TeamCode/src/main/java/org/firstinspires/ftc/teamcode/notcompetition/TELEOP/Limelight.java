@@ -1,106 +1,92 @@
-
 package org.firstinspires.ftc.teamcode.notcompetition.TELEOP;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import java.util.HashMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+public class Limelight {
+    private final HardwareMap hardwareMap;
+    private final Telemetry telemetry;
+    private final Servo clawBServo;
 
-import java.util.List;
-
-//@TeleOp(name = "Sensor Limelight3A", group = "Sensor")
-
-public class Limelight extends LinearOpMode {
-    private Limelight3A limelight;
-
-    @Override
-    public void runOpMode() throws InterruptedException
-    {
-        limelight = hardwareMap.get(Limelight3A.class,"limelight");
-
-        telemetry.setMsTransmissionInterval(11);
-
-        limelight.pipelineSwitch(1);
-
-        limelight.start();
-
-
-        telemetry.addData(">", "Robot Ready, press play");
-        telemetry.update();
-        waitForStart();
-
-        while (opModeIsActive()) {
-            LLStatus status = limelight.getStatus();
-            telemetry.addData("Name", "%s",
-                    status.getName());
-            telemetry.addData("LL", "Temp: %.1fC, CPU: %.1f%%, FPS: %d",
-                    status.getTemp(), status.getCpu(),(int)status.getFps());
-            telemetry.addData("Pipeline", "Index: %d, Type: %s",
-                    status.getPipelineIndex(), status.getPipelineType());
-
-            LLResult result = limelight.getLatestResult();
-            if (result != null) {
-                // Access general information
-                Pose3D botpose = result.getBotpose();
-                double captureLatency = result.getCaptureLatency();
-                double targetingLatency = result.getTargetingLatency();
-                double parseLatency = result.getParseLatency();
-                telemetry.addData("LL Latency", captureLatency + targetingLatency);
-                telemetry.addData("Parse Latency", parseLatency);
-                telemetry.addData("PythonOutput", java.util.Arrays.toString(result.getPythonOutput()));
-
-                if (result.isValid()) {
-                    telemetry.addData("tx", result.getTx());
-                    telemetry.addData("txnc", result.getTxNC());
-                    telemetry.addData("ty", result.getTy());
-                    telemetry.addData("tync", result.getTyNC());
-
-                    telemetry.addData("Botpose", botpose.toString());
-
-                    // Access barcode results
-                    List<LLResultTypes.BarcodeResult> barcodeResults = result.getBarcodeResults();
-                    for (LLResultTypes.BarcodeResult br : barcodeResults) {
-                        telemetry.addData("Barcode", "Data: %s", br.getData());
-                    }
-
-                    // Access classifier results
-                    List<LLResultTypes.ClassifierResult> classifierResults = result.getClassifierResults();
-                    for (LLResultTypes.ClassifierResult cr : classifierResults) {
-                        telemetry.addData("Classifier", "Class: %s, Confidence: %.2f", cr.getClassName(), cr.getConfidence());
-                    }
-
-                    // Access detector results
-                    List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
-                    for (LLResultTypes.DetectorResult dr : detectorResults) {
-                        telemetry.addData("Detector", "Class: %s, Area: %.2f", dr.getClassName(), dr.getTargetArea());
-                    }
-
-                    // Access fiducial results
-                    List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                        telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(),fr.getTargetXDegrees(), fr.getTargetYDegrees());
-                    }
-
-                    // Access color results
-                    List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
-                    for (LLResultTypes.ColorResult cr : colorResults) {
-                        telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
-                    }
-                }
-            } else {
-                telemetry.addData("Limelight", "No data available");
-            }
-
-            telemetry.update();
-        }
-        limelight.stop();
-
-
+    public Limelight(OpMode opMode) {
+        this.hardwareMap = opMode.hardwareMap;
+        this.telemetry = opMode.telemetry;
+        this.clawBServo = hardwareMap.get(Servo.class, "clawB"); // Adjust name as needed
     }
 
+    public void updateTelemetry() {
+        HashMap<String, Double> limelightData = getLimelightData();
+
+        double tx = limelightData.getOrDefault("tx", 0.0); // Horizontal offset
+        double ty = limelightData.getOrDefault("ty", 0.0); // Vertical offset
+        double ts = limelightData.getOrDefault("ts", 0.0); // Skew/rotation
+
+        int pipeline = determinePipeline(limelightData);
+        setPipeline(pipeline);
+
+        double angle = calculateAngle(tx, ty, ts);
+        adjustClaw(angle);
+
+        telemetry.addData("Detected Angle", angle);
+        telemetry.addData("Active Pipeline", pipeline);
+        telemetry.update();
+    }
+
+    private HashMap<String, Double> getLimelightData() {
+        HashMap<String, Double> data = new HashMap<>();
+
+        // Simulated data retrieval (replace with actual network table queries if needed)
+        data.put("tx", getNetworkTableValue("tx"));
+        data.put("ty", getNetworkTableValue("ty"));
+        data.put("ts", getNetworkTableValue("ts"));
+        data.put("tv", getNetworkTableValue("tv")); // Target valid
+        data.put("tID", getNetworkTableValue("tID")); // Target ID or classification (mocked)
+
+        return data;
+    }
+
+    private double getNetworkTableValue(String key) {
+        // Placeholder for actual Limelight API integration
+        return 0.0; // Replace with NetworkTable or HTTP GET request
+    }
+
+    private double calculateAngle(double tx, double ty, double ts) {
+        // If Limelight provides direct skew (ts), use it
+        if (ts != 0.0) {
+            return ts;
+        }
+
+        // Otherwise, estimate angle using trigonometry
+        return Math.toDegrees(Math.atan2(ty, tx));
+    }
+
+    private int determinePipeline(HashMap<String, Double> limelightData) {
+        // Assume tID is a target identifier for different colors
+        double targetID = limelightData.getOrDefault("tID", -1.0);
+
+        if (targetID == 0) { // Red
+            return 0;
+        } else if (targetID == 1) { // Yellow
+            return 1;
+        } else if (targetID == 2) { // Blue
+            return 2;
+        }
+        return 0; // Default to red pipeline
+    }
+
+    private void setPipeline(int pipeline) {
+        // Placeholder for setting the Limelight pipeline
+        // Replace with actual API call to set pipeline
+        telemetry.addData("Switching to Pipeline", pipeline);
+    }
+
+    private void adjustClaw(double angle) {
+        // Convert angle into a servo position (assuming servo range is 0-1)
+        double servoPosition = Math.max(0, Math.min(1, (angle + 90) / 180));
+        clawBServo.setPosition(servoPosition);
+        telemetry.addData("Claw Position", servoPosition);
+    }
 }
