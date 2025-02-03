@@ -12,11 +12,13 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.SampleRevBlinkinLedDriver;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
+import org.firstinspires.ftc.teamcode.utils.ArmT;
+import org.firstinspires.ftc.teamcode.utils.Extender;
 
 
 @TeleOp(name = "QuantumDrive")
 public class QuantumDrive extends LinearOpMode {
-/*    private Follower follower;*/
+    /*    private Follower follower;*/
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -26,26 +28,24 @@ public class QuantumDrive extends LinearOpMode {
         DcMotor backRightMotor = hardwareMap.dcMotor.get("rightBack");
         DcMotor armLift1 = hardwareMap.dcMotor.get("lift1");
         DcMotor armLift2 = hardwareMap.dcMotor.get("lift2");
+//        DcMotor extendB = hardwareMap.dcMotor.get("extendB");
+//        DcMotor armT = hardwareMap.dcMotor.get("armT");
+        ArmT armT1 = new ArmT(hardwareMap);
+        Extender extendB1 = new Extender(hardwareMap);
 
         TouchSensor touch = hardwareMap.touchSensor.get("touch");
 
 //        follower = new Follower(hardwareMap);
 
-        ServoImplEx clawTServo = (ServoImplEx)hardwareMap.servo.get("clawT");
-        ServoImplEx clawBServo = (ServoImplEx)hardwareMap.servo.get("clawB");
-        ServoImplEx wristBServo = (ServoImplEx)hardwareMap.servo.get("wristB");
-        ServoImplEx wristTServo = (ServoImplEx)hardwareMap.servo.get("wristT");
+        ServoImplEx clawTServo = (ServoImplEx) hardwareMap.servo.get("clawT");
+        ServoImplEx clawBServo = (ServoImplEx) hardwareMap.servo.get("clawB");
+        ServoImplEx wristBServo = (ServoImplEx) hardwareMap.servo.get("wristB");
+        ServoImplEx wristTServo = (ServoImplEx) hardwareMap.servo.get("wristT");
         ServoImplEx armBServo = (ServoImplEx) hardwareMap.servo.get("armB");
-        ServoImplEx armTServo = (ServoImplEx) hardwareMap.servo.get("armT");
-        ServoImplEx extendRServo = (ServoImplEx) hardwareMap.servo.get("extendR");
-        ServoImplEx extendLServo = (ServoImplEx) hardwareMap.servo.get("extendL");
 
-        extendLServo.setDirection(ServoImplEx.Direction.REVERSE);
         PwmControl.PwmRange pwmRange = new PwmControl.PwmRange(500, 2500);
-        extendLServo.setPwmRange(pwmRange);
-        extendRServo.setPwmRange(pwmRange);
+
         armBServo.setPwmRange(pwmRange);
-        armTServo.setPwmRange(pwmRange);
         clawTServo.setPwmRange(pwmRange);
         clawBServo.setPwmRange(pwmRange);
         wristBServo.setPwmRange(pwmRange);
@@ -59,20 +59,29 @@ public class QuantumDrive extends LinearOpMode {
         boolean modeEnabled = false;
         boolean modeButtonPressed = false;
         boolean dpadUpIsPressed = false;
+        boolean dpadLeftIsPressed = false;
         boolean transferPiece = false;
         boolean transferStarted = false;
         boolean liftFall = false;
+
         int transferPos = -500;
 
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+//        extendB.setDirection(DcMotorSimple.Direction.REVERSE);
 
         armLift1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armLift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armLift2.setDirection(DcMotorSimple.Direction.REVERSE);
         armLift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+//        armT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        armT.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        extendB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        extendB.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         waitForStart();
 
         if (isStopRequested()) return;
@@ -86,10 +95,11 @@ public class QuantumDrive extends LinearOpMode {
         double backLeftTargetPower;
         double frontRightTargetPower;
         double backRightTargetPower;
-        double armBPosition = 0.2;;
+        double armBPosition = 0.2;
+        ;
         int wristBPositionState = 0;
         int targetPosition = 0;
-
+        int liftUpPosition = -1250;
 
 
         double deadzone = 0.1; // Adjust this value for the deadzone of the joysticks
@@ -97,17 +107,21 @@ public class QuantumDrive extends LinearOpMode {
         // armLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armLift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        armT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        extendB.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        armT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        extendB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        armBServo.setDirection(Servo.Direction.REVERSE);
+        //armBServo.setDirection(Servo.Direction.REVERSE);
 
 
         // Constants
-        int liftOutTarget = -1900; // Maximum extension position
+        int liftOutTarget = -2500; // Maximum extension position
         int liftInTarget = 0;      // Fully retracted position
         double liftHoldPower = 0.5; // Power to hold the current position
 
@@ -115,23 +129,20 @@ public class QuantumDrive extends LinearOpMode {
 
         clawTServo.setPosition(0.35);
         clawBServo.setPosition(0.35);
-        armTServo.setPosition(0.25);
-        extendLServo.setPosition(0.25);
-        extendRServo.setPosition(0.25);
-        wristBServo.setPosition(0.55);
+        wristBServo.setPosition(0.5);
         wristTServo.setPosition(0.3);
 
 
         // Main loop: run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            double y = gamepad1.left_stick_y * 0.85;
-            double x = (gamepad1.left_stick_x * 1.1) * 0.85;
-            double rx = (-gamepad1.right_stick_x) * 0.85;
+            double y = gamepad2.left_stick_y * 0.85;
+            double x = (gamepad2.left_stick_x * 1.1) * 0.85;
+            double rx = (-gamepad2.right_stick_x) * 0.85;
 
-            double y2 = gamepad2.left_stick_y;
-            double x2 = gamepad2.left_stick_x * 0.5;
+            double y2 = gamepad2.right_stick_y;
+            double x2 = 0;
 
-           /* follower.update();*/
+            /* follower.update();*/
 
 
             // dn
@@ -140,57 +151,73 @@ public class QuantumDrive extends LinearOpMode {
             boolean extendOut = gamepad2.right_bumper;
             boolean extendIn = gamepad2.right_trigger > 0.2;
 
-            if(Math.abs(y2) > 0.1) {
-                double currentExtendPosR = extendRServo.getPosition();
-                extendRServo.setPosition(currentExtendPosR-0.01*y2);
-                double currentExtendPosL = extendLServo.getPosition();
-                extendLServo.setPosition(currentExtendPosL-0.01*y2);
-            }
 
-
-
-            if(gamepad2.guide && !modeButtonPressed){
+            if (gamepad2.guide && !modeButtonPressed) {
                 modeEnabled = !modeEnabled;
                 modeButtonPressed = true;
-            } else if(!gamepad2.guide){
+            } else if (!gamepad2.guide) {
                 modeButtonPressed = false;
             }
 
-            if(modeEnabled){
-                if(gamepad2.dpad_up && !dpadUpIsPressed){
-                    while(armLift1.getCurrentPosition() > -1300 && armLift2.getCurrentPosition() > -1300){
-                        armLift1.setTargetPosition(targetPosition);
-                        armLift2.setTargetPosition(targetPosition);
-                        armLift1.setPower(1);
-                        armLift2.setPower(1);
+            if (modeEnabled) {
+                if (gamepad2.dpad_up && !dpadUpIsPressed) {
+                    if ((armLift1.getCurrentPosition() == liftUpPosition) && (armLift2.getCurrentPosition() == liftUpPosition)) {
+                        armLift1.setTargetPosition(liftUpPosition);
+                        armLift2.setTargetPosition(liftUpPosition);
+                        armLift1.setPower(0.5);
+                        armLift2.setPower(0.5);
                         armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        targetPosition -= 50;
+                    } else {
+                        while (armLift1.getCurrentPosition() > liftUpPosition && armLift2.getCurrentPosition() > liftUpPosition) {
+                            armLift1.setTargetPosition(targetPosition);
+                            armLift2.setTargetPosition(targetPosition);
+                            armLift1.setPower(1);
+                            armLift2.setPower(1);
+                            armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            targetPosition -= 50;
+                        }
                     }
-
-
-                }
-                else if(gamepad2.dpad_down){
-                    armTServo.setPosition(0.88);
+                } else if (gamepad2.dpad_down) {
+//                    armT.setTargetPosition(200);
+//                    armT.setPower(1);
+                    armT1.setPosition(200);
                     wristTServo.setPosition(0.3);
                 }
                 dpadUpIsPressed = gamepad2.dpad_up;
-            }
-            else {
+
+                if ((gamepad2.dpad_left && !dpadLeftIsPressed)) {
+//                    armT.setTargetPosition(200);
+//                    armT.setPower(1);
+                    armT1.setPosition(200);
+                }
+                dpadLeftIsPressed = gamepad2.dpad_left;
+            } else {
                 if (gamepad2.dpad_up) {
-                    double currentArmTPos = armTServo.getPosition();
-                    armTServo.setPosition(currentArmTPos+0.01);
+//                    int currentArmTPos = armT.getCurrentPosition();
+//                    armT.setTargetPosition(5000);
+//                    armT.setPower(0.2);
+//                    armT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armT1.setPosition(5000);
                 } else if (gamepad2.dpad_down) {
-                    double currentArmTPos = armTServo.getPosition();
-                    armTServo.setPosition(currentArmTPos-0.01);
+//                    int currentArmTPos = armT.getCurrentPosition();
+//                    armT.setTargetPosition(0);
+//                    armT.setPower(0.2);
+//                    armT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armT1.setPosition(0);
+                } else {
+//                    armT.setPower(0);
+                    armT1.stop();
+                }
+
+                if (gamepad2.dpad_left) {
+                    wristTServo.setPosition(0.5);
+                } else if (gamepad2.dpad_right) {
+                    wristTServo.setPosition(1);
                 }
             }
 
-            if (gamepad2.dpad_left) {
-                wristTServo.setPosition(0.5);
-            } else if (gamepad2.dpad_right) {
-                wristTServo.setPosition(1);
-            }
 
             if (gamepad2.a && !aWasPressed) {
                 clawTclosed = !clawTclosed;
@@ -216,11 +243,11 @@ public class QuantumDrive extends LinearOpMode {
                         sleep(200); // Wait for the arm to lower
                     }
 
-                    
+
                     clawBServo.setPosition(0.65); // Close claw
                     sleep(200); // Wait for claw to fully close
 
-                    if (armBPosition==0) {
+                    if (armBPosition == 0) {
                         armBPosition = 0.22;
                         armBServo.setPosition(armBPosition);
                     }
@@ -239,17 +266,20 @@ public class QuantumDrive extends LinearOpMode {
                 // Cycle through positions when button is pressed
                 if (armBPosition == 0.22) {
                     armBPosition = 1; // Move to transfer position+
-                    if(!transferStarted) {
+                    if (!transferStarted) {
                         transferPiece = true;
                     }
                     wristBServo.setPosition(0.5);
                     wristTServo.setPosition(0.3);
-                    armTServo.setPosition(0.16);
+//                    armT.setTargetPosition(200);
+//                    armT.setPower(1);
+                    armT1.setPosition(200);
                     clawBServo.setPosition(0.65);
 
                     clawTServo.setPosition(0.35);
-                    extendLServo.setPosition(0.25);
-                    extendRServo.setPosition(0.25);
+//                    extendB.setTargetPosition(200);
+//                    extendB.setPower(1);
+                    extendB1.setPosition(200);
 
                 } else {
                     transferPiece = false;
@@ -263,7 +293,7 @@ public class QuantumDrive extends LinearOpMode {
                 armBButtonPressed = false;
             }
 
-           // Set the position of armB servo
+            // Set the position of armB servo
             armBServo.setPosition(armBPosition);
 
 
@@ -292,151 +322,133 @@ public class QuantumDrive extends LinearOpMode {
             }
 
 
-//            if (gamepad2.dpad_left) {
-//                // Wait a small amount of time to avoid button spamming
-//                sleep(200);  // Adjust the sleep time if needed
-//
-//                // Increment position state, looping back to 0 when reaching 3
-//                wristTPositionState = (wristTPositionState + 1) % 3;
-//
-//                // Set wristB position based on current state
-//                switch (wristTPositionState) {
-//                    case 0: // Starting position (0 degrees)
-//                        wristTServo.setPosition(0.5);  // Adjust this value for the starting position
-//                        break;
-//                    case 1: // 45 degrees left
-//                        wristTServo.setPosition(0.35);  // Adjust this value for 45 degrees to the left
-//                        break;
-//                    case 2: // 45 degrees right
-//                        wristTServo.setPosition(0.65);  // Adjust this value for 45 degrees to the right
-//                        break;
-//                }
-//            }
-
-
-            if (extendOut){
-                double currentLiftPos = extendRServo.getPosition();
-                extendRServo.setPosition(currentLiftPos+0.05);
-                double currentLiftPosL = extendLServo.getPosition();
-                extendLServo.setPosition(currentLiftPosL+0.05);
+            if (extendOut) {
+//                int currentExtendBPos = extendB.getCurrentPosition();
+//                extendB.setTargetPosition(-1500);
+//                extendB.setPower(0.1);
+//                extendB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                extendB1.setPosition(-1500);
+            } else {
+//                extendB.setPower(0);
+                extendB1.stop();
             }
-            if (extendIn){
-                double currentLiftPos = extendRServo.getPosition();
-                extendRServo.setPosition(currentLiftPos-0.05);
-                double currentLiftPosL = extendLServo.getPosition();
-                extendLServo.setPosition(currentLiftPosL-0.05);
-            }
+            if (extendIn) {
+//                int currentExtendBPos = extendB.getCurrentPosition();
+//                extendB.setTargetPosition(0);
+//                extendB.setPower(0.1);
+//                extendB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                extendB1.setPosition(0);
+            } else {
+//                extendB.setPower(0);
+                extendB1.stop();
 
-            currentLiftPosition1 = armLift1.getCurrentPosition();
-            currentLiftPosition2 = armLift2.getCurrentPosition();
+                currentLiftPosition1 = armLift1.getCurrentPosition();
+                currentLiftPosition2 = armLift2.getCurrentPosition();
 
-            if (liftOut) {
-                // Run motors to top position
-                armLift1.setTargetPosition(liftOutTarget);
-                armLift2.setTargetPosition(liftOutTarget);
-                armLift1.setPower(1);
-                armLift2.setPower(1);
-                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            } else if (liftIn && !touch.isPressed()) {
-                transferStarted = true;
-                // Run motors to bottom position unless touch sensor is pressed
-                armLift1.setTargetPosition(liftInTarget);
-                armLift2.setTargetPosition(liftInTarget);
-                armLift1.setPower(1);
-                armLift2.setPower(1);
-                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            } else if(transferPiece && !transferStarted) {
-                // Hold current position
-                if(currentLiftPosition1>-170){
-                    armLift1.setPower(0);
-                    armLift2.setPower(0);
-                }
-                else{
+                if (liftOut) {
+                    // Run motors to top position
+                    armLift1.setTargetPosition(liftOutTarget);
+                    armLift2.setTargetPosition(liftOutTarget);
                     armLift1.setPower(1);
                     armLift2.setPower(1);
+                    armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                } else if (liftIn && !touch.isPressed()) {
+                    transferStarted = true;
+                    // Run motors to bottom position unless touch sensor is pressed
+                    armLift1.setTargetPosition(liftInTarget);
+                    armLift2.setTargetPosition(liftInTarget);
+                    armLift1.setPower(1);
+                    armLift2.setPower(1);
+                    armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                } else if (transferPiece && !transferStarted) {
+                    // Hold current position
+                    if (currentLiftPosition1 > -170) {
+                        armLift1.setPower(0);
+                        armLift2.setPower(0);
+                    } else {
+                        armLift1.setPower(1);
+                        armLift2.setPower(1);
+                    }
+                    armLift1.setTargetPosition(transferPos);
+                    armLift2.setTargetPosition(transferPos);
+                    armLift1.setPower(1);
+                    armLift2.setPower(1);
+                    armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                } else {
+                    armLift1.setTargetPosition(currentLiftPosition1);
+                    armLift2.setTargetPosition(currentLiftPosition2);
+                    armLift1.setPower(liftHoldPower);
+                    armLift2.setPower(liftHoldPower);
+                    armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
-                armLift1.setTargetPosition(transferPos);
-                armLift2.setTargetPosition(transferPos);
-                armLift1.setPower(1);
-                armLift2.setPower(1);
-                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
-            else {
-                armLift1.setTargetPosition(currentLiftPosition1);
-                armLift2.setTargetPosition(currentLiftPosition2);
-                armLift1.setPower(liftHoldPower);
-                armLift2.setPower(liftHoldPower);
-                armLift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
 
-            if (touch.isPressed()) {
-                // Reset encoders when the lift is fully retracted
-                armLift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                armLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                armLift1.setTargetPosition(liftInTarget);
-                armLift2.setTargetPosition(liftInTarget);
-            }
+                if (touch.isPressed()) {
+                    // Reset encoders when the lift is fully retracted
+                    armLift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    armLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    armLift1.setTargetPosition(liftInTarget);
+                    armLift2.setTargetPosition(liftInTarget);
+                }
 
-            if (Math.abs(y) < deadzone && Math.abs(x) < deadzone && Math.abs(rx) < deadzone && Math.abs(x2)<deadzone) {
-                // Stop motors immediately if within the deadzone
-                frontLeftTargetPower = 0;
-                backLeftTargetPower = 0;
-                frontRightTargetPower = 0;
-                backRightTargetPower = 0;
-                frontLeftMotor.setPower(0);
-                backLeftMotor.setPower(0);
-                frontRightMotor.setPower(0);
-                backRightMotor.setPower(0);
-            }
-            else {
-                // Separate the logic for strafing (x) and turning (rx)
-                double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx) + Math.abs(x2), 1);
+                if (Math.abs(y) < deadzone && Math.abs(x) < deadzone && Math.abs(rx) < deadzone && Math.abs(x2) < deadzone) {
+                    // Stop motors immediately if within the deadzone
+                    frontLeftTargetPower = 0;
+                    backLeftTargetPower = 0;
+                    frontRightTargetPower = 0;
+                    backRightTargetPower = 0;
+                    frontLeftMotor.setPower(0);
+                    backLeftMotor.setPower(0);
+                    frontRightMotor.setPower(0);
+                    backRightMotor.setPower(0);
+                } else {
+                    // Separate the logic for strafing (x) and turning (rx)
+                    double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx) + Math.abs(x2), 1);
 
-                // Corrected motor power calculations
-                frontLeftTargetPower = (y + x + rx + x2) / denominator;
-                backLeftTargetPower = (y - x + rx - x2) / denominator;
-                frontRightTargetPower = (y - x - rx - x2) / denominator;
-                backRightTargetPower = (y + x - rx + x2) / denominator;
-            }
+                    // Corrected motor power calculations
+                    frontLeftTargetPower = (y + x + rx + x2) / denominator;
+                    backLeftTargetPower = (y - x + rx - x2) / denominator;
+                    frontRightTargetPower = (y - x - rx - x2) / denominator;
+                    backRightTargetPower = (y + x - rx + x2) / denominator;
+                }
 
 
-            telemetry.addData("Servo Positions", "----");
-            telemetry.addData("Lift1 Position", currentLiftPosition1);
-            telemetry.addData("Lift2 Position", currentLiftPosition2);
-            telemetry.addData("ClawT Position", clawTServo.getPosition());
-            telemetry.addData("ClawB Position", clawBServo.getPosition());
-            telemetry.addData("WristB Position", wristBServo.getPosition());
-            telemetry.addData("WristT Position", wristTServo.getPosition());
-            telemetry.addData("ArmB Position", armBServo.getPosition());
-            telemetry.addData("ArmT Position", armTServo.getPosition());
-            telemetry.addData("Front Left Power", frontLeftTargetPower);
-            telemetry.addData("Back Left Power", backLeftTargetPower);
-            telemetry.addData("Front Right Power", frontRightTargetPower);
-            telemetry.addData("Back Right Power", backRightTargetPower);
-            telemetry.addData("extendL", extendLServo.getPosition());
-            telemetry.addData("extendR", extendRServo.getPosition());
+                telemetry.addData("Servo Positions", "----");
+                telemetry.addData("Lift1 Position", currentLiftPosition1);
+                telemetry.addData("Lift2 Position", currentLiftPosition2);
+                telemetry.addData("ClawT Position", clawTServo.getPosition());
+                telemetry.addData("ClawB Position", clawBServo.getPosition());
+                telemetry.addData("WristB Position", wristBServo.getPosition());
+                telemetry.addData("WristT Position", wristTServo.getPosition());
+                telemetry.addData("ArmB Position", armBServo.getPosition());
+                telemetry.addData("ArmT Position", armT1.getCurrentPosition());
+                telemetry.addData("Front Left Power", frontLeftTargetPower);
+                telemetry.addData("Back Left Power", backLeftTargetPower);
+                telemetry.addData("Front Right Power", frontRightTargetPower);
+                telemetry.addData("Back Right Power", backRightTargetPower);
+                telemetry.addData("extendB", extendB1.getCurrentPosition());
 //            telemetry.addData("X", follower.getPose().getX());
 //            telemetry.addData("Y", follower.getPose().getY());
 //            telemetry.addData(" Heading", follower.getPose().getHeading());
-            telemetry.update();
+                telemetry.update();
 
 
-            // Ramp up motor powers towards target powers
-            frontLeftPower += rampUpRate * (frontLeftTargetPower - frontLeftPower);
-            backLeftPower += rampUpRate * (backLeftTargetPower - backLeftPower);
-            frontRightPower += rampUpRate * (frontRightTargetPower - frontRightPower);
-            backRightPower += rampUpRate * (backRightTargetPower - backRightPower);
+                // Ramp up motor powers towards target powers
+                frontLeftPower += rampUpRate * (frontLeftTargetPower - frontLeftPower);
+                backLeftPower += rampUpRate * (backLeftTargetPower - backLeftPower);
+                frontRightPower += rampUpRate * (frontRightTargetPower - frontRightPower);
+                backRightPower += rampUpRate * (backRightTargetPower - backRightPower);
 
-            frontLeftMotor.setPower(frontLeftPower);
-            backLeftMotor.setPower(backLeftPower);
-            frontRightMotor.setPower(frontRightPower);
-            backRightMotor.setPower(backRightPower);
+                frontLeftMotor.setPower(frontLeftPower);
+                backLeftMotor.setPower(backLeftPower);
+                frontRightMotor.setPower(frontRightPower);
+                backRightMotor.setPower(backRightPower);
 
 
+            }
         }
     }
 }

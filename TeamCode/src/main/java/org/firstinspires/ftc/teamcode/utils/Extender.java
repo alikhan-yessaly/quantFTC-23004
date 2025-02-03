@@ -1,48 +1,61 @@
 package org.firstinspires.ftc.teamcode.utils;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.hardware.PwmControl;
 
 public class Extender {
-    private final ServoImplEx extenderRServo;
-    private final ServoImplEx extenderLServo;
+    private final DcMotor extender;
+    private static final int zeroPose = 0;
+    private static final int outPose = -2500;
+    private static final int positionTolerance = 50;
+    private static final double maxPower = 1.0;
+    private static int targetPos = 0;
 
     public Extender(HardwareMap hardwareMap) {
-        extenderRServo = hardwareMap.get(ServoImplEx.class, "extendR");
-        extenderLServo = hardwareMap.get(ServoImplEx.class, "extendL");
+       extender = hardwareMap.dcMotor.get("extendB");
 
-        PwmControl.PwmRange pwmRange = new PwmControl.PwmRange(500, 2500);
-        extenderRServo.setPwmRange(pwmRange);
-        extenderLServo.setPwmRange(pwmRange);
+       extender.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        extenderLServo.setDirection(Servo.Direction.REVERSE);
+        extender.setDirection(DcMotorSimple.Direction.REVERSE);
+
+       extender.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
 
     public void setPosition(double position) {
-        extenderRServo.setPosition(position);
-        extenderLServo.setPosition(position);
+        if(position > targetPos){
+            while(extender.getCurrentPosition() < position){
+                extender.setTargetPosition(targetPos);
+                extender.setPower(maxPower);
+                extender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                targetPos -= 20;
+            }
+        }
+        else{
+            while(extender.getCurrentPosition() > position){
+                extender.setTargetPosition(targetPos);
+                extender.setPower(maxPower);
+                extender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                targetPos += 20;
+            }
+        }
     }
 
-    public double getExtendRPosition() {
-        return extenderRServo.getPosition();
+    public double getCurrentPosition(){
+        return extender.getCurrentPosition();
     }
 
-    public double getExtendLPosition(){
-        return extenderLServo.getPosition();
+    public boolean isAtTarget(){
+        return !extender.isBusy();
     }
 
-    public void raise(double increment) {
-        double newPosition = Math.min(1.0, extenderRServo.getPosition() + increment);
-        extenderRServo.setPosition(newPosition);
-        extenderLServo.setPosition(newPosition);
+    public boolean isAtPosition(int targetPosition) {
+        int currentPosition = extender.getCurrentPosition();
+        return Math.abs(currentPosition - targetPosition) <= positionTolerance;
     }
 
-    public void lower(double decrement) {
-        double newPosition = Math.max(0.0, extenderRServo.getPosition() - decrement);
-        extenderRServo.setPosition(newPosition);
-        extenderLServo.setPosition(newPosition);
+    public void stop(){
+        extender.setPower(0);
     }
 }
