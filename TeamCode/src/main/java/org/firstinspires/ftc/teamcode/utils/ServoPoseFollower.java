@@ -18,7 +18,7 @@ public class ServoPoseFollower {
     private boolean isComplete = false;
 
     public ServoPoseFollower(HardwareMap hardwareMap, List<ServoPose> poses) {
-        this.extender = new Extender(hardwareMap);
+        this.extender = new Extender(hardwareMap, "extendB");
         this.arm = new Arm(hardwareMap);
         this.wrist = new Wrist(hardwareMap);
         this.claw = new Claw(hardwareMap);
@@ -58,7 +58,7 @@ public class ServoPoseFollower {
 
     // Apply the servo positions for the given pose
     private void applyPose(ServoPose pose) {
-        extender.setPosition(pose.getExtenderPosition());
+//        extender.setPosition(pose.getExtenderPosition());
         arm.setPosition(pose.getArmBPosition(), pose.getArmTPosition());
         wrist.setPosition(pose.getWristBPosition(), pose.getWristTPosition());
         claw.setPosition(pose.getClawBPosition(), pose.getClawTPosition());

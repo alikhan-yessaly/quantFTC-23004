@@ -4,15 +4,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class Extender {
-    private final DcMotor extender;
+public class ArmTtest {
+    private final DcMotor armT;
 
     private static final int positionTolerance = 20; // Acceptable error range
     private static double kP = 0.001;  // Proportional gain
     private static double kI = 0.001; // Integral gain
     private static double kD = 0.00001; // Derivative gain
 
-    private static double maxPower = 0.4;
+    private static double maxPower = 0.6;
 
     private static double holdPower = 0.1;
 
@@ -21,10 +21,10 @@ public class Extender {
     private double lastError = 0;
     private long lastTime = System.currentTimeMillis();
 
-    public Extender(HardwareMap hardwareMap, String motorName) {
-        extender = hardwareMap.dcMotor.get(motorName);
-        extender.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        extender.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    public ArmTtest(HardwareMap hardwareMap, String motorName) {
+        armT = hardwareMap.dcMotor.get(motorName);
+        armT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void setPosition(int position) {
@@ -34,50 +34,47 @@ public class Extender {
     }
 
     public void update() {
-        int currentPos = extender.getCurrentPosition();
+        int currentPos = armT.getCurrentPosition();
         int error = targetPos - currentPos;
         long currentTime = System.currentTimeMillis();
-        double deltaTime = (currentTime - lastTime) / 1000.0;
-
-        if (isAtTarget()) {
-            extender.setPower(0);
-            extender.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            integral = 0;
-            lastError = 0;
-            return;
-        }
-        if(Math.abs(error) < positionTolerance){
-            integral = 0;
-        }
-        else{
+        double deltaTime = (currentTime - lastTime) / 1000.0; // Convert ms to seconds
+        if (Math.abs(error) > positionTolerance) {
+            // PID calculations
             integral += error * deltaTime;
+            double derivative = (error - lastError) / deltaTime;
+            double power = (kP * error) + (kI * integral) + (kD * derivative);
+
+            // Constrain power
+            power = Math.max(-maxPower, Math.min(maxPower, power));
+
+            armT.setPower(power);
+        } else {
+            // Smooth stop and hold position properly
+            integral = 0;  // Reset integral to avoid windup
+            lastError = 0;  // Reset derivative influence
+
+            // Apply **just enough power** to hold position
+            if (targetPos == 0) {
+                armT.setPower(0);  // Don't apply hold power when fully retracted
+            } else {
+                armT.setPower(holdPower * 0.8);  // Reduce hold power slightly to prevent overshoot
+            }
         }
-
-        // PID calculations
-        double derivative = (error - lastError) / (deltaTime + 0.001);
-        double power = (kP * error) + (kI * integral) + (kD * derivative);
-
-        // Constrain power
-        power = Math.max(-maxPower, Math.min(maxPower, power));
-        extender.setPower(power);
 
         lastError = error;
         lastTime = currentTime;
     }
 
-
     public int getCurrentPosition() {
-        return -extender.getCurrentPosition();
+        return armT.getCurrentPosition();
     }
 
     public boolean isAtTarget() {
         return Math.abs(targetPos - getCurrentPosition()) <= positionTolerance;
     }
 
-
     public void stop() {
-        extender.setPower(0);
-        extender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armT.setPower(0);
     }
 
 

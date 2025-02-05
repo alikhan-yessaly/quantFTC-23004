@@ -8,12 +8,12 @@ public class ArmT {
 
     private static final int zeroPose = 0;
     private static final int outPose = 8000;
-    private static final int positionTolerance = 50;
-    private static final double maxPower = 1.0;
+    private static final int positionTolerance = 100;
+    private static final double maxPower = 0.5;
     private static int targetPos = 0;
 
-    public ArmT(HardwareMap hardwareMap){
-        armT = hardwareMap.dcMotor.get("armT");
+    public ArmT(HardwareMap hardwareMap, String motorName){
+        armT = hardwareMap.dcMotor.get(motorName);
 
         armT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 

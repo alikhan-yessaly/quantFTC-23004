@@ -28,10 +28,10 @@ public class QuantumDrive extends LinearOpMode {
         DcMotor backRightMotor = hardwareMap.dcMotor.get("rightBack");
         DcMotor armLift1 = hardwareMap.dcMotor.get("lift1");
         DcMotor armLift2 = hardwareMap.dcMotor.get("lift2");
-//        DcMotor extendB = hardwareMap.dcMotor.get("extendB");
+        DcMotor extendB = hardwareMap.dcMotor.get("extendB");
 //        DcMotor armT = hardwareMap.dcMotor.get("armT");
-        ArmT armT1 = new ArmT(hardwareMap);
-        Extender extendB1 = new Extender(hardwareMap);
+        ArmT armT1 = new ArmT(hardwareMap, "armT");
+//        Extender extendB1 = new Extender(hardwareMap, "extendB");
 
         TouchSensor touch = hardwareMap.touchSensor.get("touch");
 
@@ -273,13 +273,13 @@ public class QuantumDrive extends LinearOpMode {
                     wristTServo.setPosition(0.3);
 //                    armT.setTargetPosition(200);
 //                    armT.setPower(1);
-                    armT1.setPosition(200);
+//                    armT1.setPosition(200);
                     clawBServo.setPosition(0.65);
 
                     clawTServo.setPosition(0.35);
-//                    extendB.setTargetPosition(200);
-//                    extendB.setPower(1);
-                    extendB1.setPosition(200);
+                    extendB.setTargetPosition(200);
+                    extendB.setPower(1);
+//                    extendB1.setPosition(200);
 
                 } else {
                     transferPiece = false;
@@ -323,24 +323,24 @@ public class QuantumDrive extends LinearOpMode {
 
 
             if (extendOut) {
-//                int currentExtendBPos = extendB.getCurrentPosition();
-//                extendB.setTargetPosition(-1500);
-//                extendB.setPower(0.1);
-//                extendB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                extendB1.setPosition(-1500);
+                int currentExtendBPos = extendB.getCurrentPosition();
+                extendB.setTargetPosition(1500);
+                extendB.setPower(0.1);
+                extendB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                extendB1.setPosition(-1500);
             } else {
-//                extendB.setPower(0);
-                extendB1.stop();
+                extendB.setPower(0);
+//                extendB1.stop();
             }
             if (extendIn) {
-//                int currentExtendBPos = extendB.getCurrentPosition();
-//                extendB.setTargetPosition(0);
-//                extendB.setPower(0.1);
-//                extendB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                extendB1.setPosition(0);
+                int currentExtendBPos = extendB.getCurrentPosition();
+                extendB.setTargetPosition(0);
+                extendB.setPower(0.1);
+                extendB.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                extendB1.setPosition(0);
             } else {
-//                extendB.setPower(0);
-                extendB1.stop();
+                extendB.setPower(0);
+//                extendB1.stop();
 
                 currentLiftPosition1 = armLift1.getCurrentPosition();
                 currentLiftPosition2 = armLift2.getCurrentPosition();
@@ -429,7 +429,7 @@ public class QuantumDrive extends LinearOpMode {
                 telemetry.addData("Back Left Power", backLeftTargetPower);
                 telemetry.addData("Front Right Power", frontRightTargetPower);
                 telemetry.addData("Back Right Power", backRightTargetPower);
-                telemetry.addData("extendB", extendB1.getCurrentPosition());
+                telemetry.addData("extendB", extendB.getCurrentPosition());
 //            telemetry.addData("X", follower.getPose().getX());
 //            telemetry.addData("Y", follower.getPose().getY());
 //            telemetry.addData(" Heading", follower.getPose().getHeading());
