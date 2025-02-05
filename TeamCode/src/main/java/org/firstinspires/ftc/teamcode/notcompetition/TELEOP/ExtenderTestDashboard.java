@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.notcompetition.TELEOP;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.utils.ArmTtest;
 import org.firstinspires.ftc.teamcode.utils.Extender;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -16,9 +15,9 @@ public class ExtenderTestDashboard extends OpMode {
     private FtcDashboard dashboard;
 
     // Tunable PID values in FTC Dashboard
-    public static double kP = 0.001;
-    public static double kI = 0.001;
-    public static double kD = 0.00001;
+    public static double kP = 0.0005;  // Proportional gain
+    public static double kI = 0.0003; // Integral gain
+    public static double kD = 0.00001; //
 
     public static int targetPos = 1000;
 
@@ -37,15 +36,13 @@ public class ExtenderTestDashboard extends OpMode {
     public void loop() {
         // Update PID values from dashboard
         extender.setPID(kP, kI, kD);
+
         // Control arm position with gamepad
         if (gamepad1.a && !wasAPressed) {
             extender.setPosition(targetPos);// Move to target position
         }
         else if (gamepad1.b && !wasBPressed) {
             extender.setPosition(0); // Reset position
-        }
-        else if(gamepad1.x){
-            extender.stop();
         }
 
         extender.update();
