@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.localization.GoBildaPinpointD
 public class Extender {
     private final DcMotor extender;
 
-    private static final int positionTolerance = 50; // Acceptable error range
+    private static final int positionTolerance = 30; // Acceptable error range
     private static double kP = 0.0005;  // Proportional gain
     private static double kI = 0.0003; // Integral gain
     private static double kD = 0.00001; // Derivative gain
@@ -69,6 +69,10 @@ public class Extender {
 
         lastError = error;
         lastTime = currentTime;
+    }
+
+    public void setPower(int power){
+        extender.setPower(power);
     }
 
     public int getCurrentPosition() {

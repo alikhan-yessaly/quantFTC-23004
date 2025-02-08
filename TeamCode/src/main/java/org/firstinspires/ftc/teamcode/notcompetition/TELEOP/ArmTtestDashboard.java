@@ -14,9 +14,12 @@ public class ArmTtestDashboard extends OpMode {
     private FtcDashboard dashboard;
 
     // Tunable PID values in FTC Dashboard
-    public static double kP = 0.001;
-    public static double kI = 0.001;
-    public static double kD = 0.00001;
+    public static double kP = 0.0005;
+    public static double kI = 0.0008;
+    public static double kD = 0.000005;
+
+
+    public static int position = 4500;
 
     boolean wasAPressed = false;
     boolean wasBPressed = false;
@@ -35,7 +38,7 @@ public class ArmTtestDashboard extends OpMode {
 
         // Control arm position with gamepad
         if (gamepad1.a && !wasAPressed) {
-            armT.setPosition(2000);// Move to target position
+            armT.setPosition(position);// Move to target position
         }
         else if (gamepad1.b && !wasBPressed) {
             armT.setPosition(0); // Reset position
@@ -48,7 +51,7 @@ public class ArmTtestDashboard extends OpMode {
 
         // Send telemetry data to FTC Dashboard
         TelemetryPacket packet = new TelemetryPacket();
-        packet.put("Target Position", 2000);
+        packet.put("Target Position", position);
         packet.put("Current Position", armT.getCurrentPosition());
         packet.put("At Target?", armT.isAtTarget());
         packet.put("kP", kP);
@@ -57,7 +60,7 @@ public class ArmTtestDashboard extends OpMode {
         dashboard.sendTelemetryPacket(packet);
 
         // Also send to driver station telemetry
-        telemetry.addData("Target Position", 2000);
+        telemetry.addData("Target Position", position);
         telemetry.addData("Current Position", armT.getCurrentPosition());
         telemetry.addData("At Target?", armT.isAtTarget());
         telemetry.addData("kP", kP);

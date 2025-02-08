@@ -15,11 +15,15 @@ public class ExtenderTestDashboard extends OpMode {
     private FtcDashboard dashboard;
 
     // Tunable PID values in FTC Dashboard
-    public static double kP = 0.0005;  // Proportional gain
-    public static double kI = 0.0003; // Integral gain
-    public static double kD = 0.00001; //
+    public static double kP = 0.002;  // Proportional gain
+    public static double kI = 0.0005; // Integral gain
+    public static double kD = 0.000005;
 
     public static int targetPos = 1000;
+    public static int stepSize = 80; // Max step size for faster movement
+    public static int minStepSize = 10; // Minimum step size (slows down near target)
+
+    private int currentTarget = 0;
 
     boolean wasAPressed = false;
     boolean wasBPressed = false;
@@ -29,7 +33,6 @@ public class ExtenderTestDashboard extends OpMode {
         extender = new Extender(hardwareMap, "extendB");
         dashboard = FtcDashboard.getInstance();
         telemetry.addData("Status", "Initialized");
-
     }
 
     @Override
@@ -37,12 +40,24 @@ public class ExtenderTestDashboard extends OpMode {
         // Update PID values from dashboard
         extender.setPID(kP, kI, kD);
 
-        // Control arm position with gamepad
+        int currentPosition = extender.getCurrentPosition();
+
+        // Move towards target in smooth steps
         if (gamepad1.a && !wasAPressed) {
-            extender.setPosition(targetPos);// Move to target position
+            currentTarget = targetPos; // Set new target position
+        } else if (gamepad1.b && !wasBPressed) {
+            currentTarget = 0; // Reset position
         }
-        else if (gamepad1.b && !wasBPressed) {
-            extender.setPosition(0); // Reset position
+
+        // **Gradual movement logic**
+        if (currentPosition < currentTarget) {
+            int distance = currentTarget - currentPosition;
+            int step = Math.max(minStepSize, Math.min(stepSize, distance / 2)); // Adjust step size
+            extender.setPosition(currentPosition + step);
+        } else if (currentPosition > currentTarget) {
+            int distance = currentPosition - currentTarget;
+            int step = Math.max(minStepSize, Math.min(stepSize, distance / 2)); // Adjust step size
+            extender.setPosition(currentPosition - step);
         }
 
         extender.update();
@@ -52,22 +67,23 @@ public class ExtenderTestDashboard extends OpMode {
 
         // Send telemetry data to FTC Dashboard
         TelemetryPacket packet = new TelemetryPacket();
-        packet.put("Target Position", targetPos);
-        packet.put("Current Position", extender.getCurrentPosition());
+        packet.put("Target Position", currentTarget);
+        packet.put("Current Position", currentPosition);
         packet.put("At Target?", extender.isAtTarget());
         packet.put("kP", kP);
         packet.put("kI", kI);
         packet.put("kD", kD);
+        packet.put("Step Size", stepSize);
         dashboard.sendTelemetryPacket(packet);
 
         // Also send to driver station telemetry
-        telemetry.addData("Target Position", targetPos);
-        telemetry.addData("Current Position", extender.getCurrentPosition());
+        telemetry.addData("Target Position", currentTarget);
+        telemetry.addData("Current Position", currentPosition);
         telemetry.addData("At Target?", extender.isAtTarget());
         telemetry.addData("kP", kP);
         telemetry.addData("kI", kI);
         telemetry.addData("kD", kD);
+        telemetry.addData("Step Size", stepSize);
         telemetry.update();
     }
 }
-

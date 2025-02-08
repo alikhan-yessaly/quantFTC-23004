@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class ArmTtest {
     private final DcMotor armT;
 
-    private static final int positionTolerance = 20; // Acceptable error range
+    private static final int positionTolerance = 50; // Acceptable error range
     private static double kP = 0.001;  // Proportional gain
     private static double kI = 0.001; // Integral gain
     private static double kD = 0.00001; // Derivative gain
