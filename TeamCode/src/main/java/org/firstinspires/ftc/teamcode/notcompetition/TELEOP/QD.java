@@ -145,6 +145,8 @@ public class QD extends LinearOpMode{
 
            headingTarget += turnInput * turnSpeed * deltaTime;
 
+           //heading code
+
            if(gp1.wasJustPressed(GamepadKeys.Button.B)){
                if((int)headingTarget%90 == 0) headingTarget -= 90;
                else headingTarget = Math.floor(headingTarget / 90.0 ) * 90.0;
@@ -187,15 +189,12 @@ public class QD extends LinearOpMode{
                    lift1.stopMotor();
                    lift2.stopMotor();
                }
-               else{
-                   lift1.stopMotor();
-                   lift2.stopMotor();
-               }
+               else { liftInput += 1; }
                liftTargetPos = -500;
            }
 
            liftTargetPos -= liftInput * liftSpeed * deltaTime;
-           if(liftTargetPos > 0) liftTargetPos = 0;
+           if(touchSensor.isPressed()) liftTargetPos = 0;
 
            double lift1Pos = lift1.getCurrentPosition();
            double lift2Pos = lift2.getCurrentPosition();
@@ -323,7 +322,7 @@ public class QD extends LinearOpMode{
                    if (!transferStarted) {
                        transferPiece = true;
                    }
-                   armTargetPos = 0;
+                   armTargetPos = 4500;
                    wristBServo.setPosition(0.85);
                    wristTServo.setPosition(0.3);
                    clawBServo.setPosition(0.65);
@@ -339,13 +338,13 @@ public class QD extends LinearOpMode{
             else if (!gamepad2.y) {
                // Reset button press state when button is released
                armBbuttonPressed = false;
-               armBPosition = 0.22;
            }
            armBServo.setPosition(armBPosition);
 
            telemetry.addData("ArmB Pos", armBPosition);
 
 
+           //dashboard telemetry
 
            TelemetryPacket packet = new TelemetryPacket();
            packet.put("Lift1 Position", lift1.getCurrentPosition());
