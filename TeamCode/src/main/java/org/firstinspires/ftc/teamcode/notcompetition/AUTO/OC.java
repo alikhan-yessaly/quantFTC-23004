@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "Dava1Clip", group = "Autonomous")
+@Autonomous(name = "1Clip", group = "Autonomous")
 public class OC extends OpMode{
 
     private enum AutoState{

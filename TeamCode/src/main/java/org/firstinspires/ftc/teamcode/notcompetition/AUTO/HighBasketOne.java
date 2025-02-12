@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "Dava1Basket", group = "Autonomous")
+@Autonomous(name = "1Basket", group = "Autonomous")
 public class HighBasketOne extends OpMode{
 
     private enum AutoState{

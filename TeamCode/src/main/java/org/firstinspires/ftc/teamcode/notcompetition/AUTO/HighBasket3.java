@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.LinkedList;
 
-@Autonomous(name = "Dava3Basket", group = "Autonomous")
+@Autonomous(name = "3Basket", group = "Autonomous")
 public class HighBasket3 extends OpMode{
 
     private enum AutoState{
