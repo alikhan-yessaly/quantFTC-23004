@@ -239,11 +239,11 @@ public class QD extends LinearOpMode{
            if(gamepad2.left_trigger > 0.2) extenderInput -= 1;
 
            extenderTargetPos += extenderInput * extenderSpeed * deltaTime;
-           extenderTargetPos = Math.max(-1500, Math.min(extenderTargetPos, 0));
+           extenderTargetPos = Math.max(-1500, Math.min(extenderTargetPos, 300));
            double extenderPos = extender.getCurrentPosition();
            extender.set(extenderPD.calculate(extenderPos, extenderTargetPos));
 
-           if ((extenderTargetPos == 0 && extenderPos >= 0) || (extenderTargetPos == -1500 && extenderPos <= -1500)) {
+           if ((extenderTargetPos == 300 && extenderPos >= 300) || (extenderTargetPos == -1500 && extenderPos <= -1500)) {
                extender.set(0);
            } else {
                extender.set(extenderPD.calculate(extenderPos, extenderTargetPos));
@@ -532,6 +532,7 @@ public class QD extends LinearOpMode{
                            }
                            break;
                        case 6:
+                           clawTServo.setPosition(0.65);
                            clawTAnimating = false;
                            break;
                    }
