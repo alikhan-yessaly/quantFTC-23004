@@ -46,6 +46,18 @@ public class LiftPD {
         lift2.set(lift2Power);
     }
 
+    public boolean isAtPosition() {
+        return lift1.atTargetPosition() && lift2.atTargetPosition();
+    }
+    public void moveUp(){
+        lift1.setTargetPosition(-2800);
+        lift2.setTargetPosition(-2800);
+    }
+    public void moveDown(){
+        lift1.setTargetPosition(0);
+        lift2.setTargetPosition(0);
+    }
+
     public double getLiftLCurrentPosition(){ return lift1.getCurrentPosition(); }
     public double getLiftRCurrentPosition(){ return lift2.getCurrentPosition(); }
 
