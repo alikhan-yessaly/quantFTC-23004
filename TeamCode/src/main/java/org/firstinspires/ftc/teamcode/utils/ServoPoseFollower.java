@@ -7,8 +7,7 @@ import java.util.List;
 
 public class ServoPoseFollower {
 
-    private final Extender extender;
-    private final Arm arm;
+    private final ArmB armB;
     private final Wrist wrist;
     private final Claw claw;
     private List<ServoPose> poses;
@@ -18,14 +17,12 @@ public class ServoPoseFollower {
     private boolean isComplete = false;
 
     public ServoPoseFollower(HardwareMap hardwareMap, List<ServoPose> poses) {
-        this.extender = new Extender(hardwareMap, "extendB");
-        this.arm = new Arm(hardwareMap);
+        this.armB = new ArmB(hardwareMap);
         this.wrist = new Wrist(hardwareMap);
         this.claw = new Claw(hardwareMap);
         this.poses = poses;
     }
 
-    // Start the pose sequence from the beginning
     public void start() {
         poseTimer.resetTimer();
         currentPoseIndex = 0;
@@ -35,7 +32,7 @@ public class ServoPoseFollower {
         }
     }
 
-    // Update the follower to handle timing and pose transitions
+
     public void update() {
         if (isComplete) return;
 
@@ -50,30 +47,28 @@ public class ServoPoseFollower {
         }
     }
 
-    // Set a new sequence of poses and restart
+
     public void setPoseSequence(List<ServoPose> newPoses) {
         this.poses = newPoses;
-        start(); // Restart the follower with the new pose sequence
+        start();
     }
 
-    // Apply the servo positions for the given pose
+
     private void applyPose(ServoPose pose) {
-//        extender.setPosition(pose.getExtenderPosition());
-        arm.setPosition(pose.getArmBPosition(), pose.getArmTPosition());
-        wrist.setPosition(pose.getWristBPosition(), pose.getWristTPosition());
         claw.setPosition(pose.getClawBPosition(), pose.getClawTPosition());
+        wrist.setPosition(pose.getWristBPosition(), pose.getWristTPosition());
+        armB.setPosition(pose.getArmBPosition());
+
     }
 
-    // Check if the current pose sequence is complete
     public boolean isComplete() {
         return isComplete;
     }
-    // In ServoPoseFollower class
     public ServoPose getCurrentPose() {
         if (currentPoseIndex >= 0 && currentPoseIndex < poses.size()) {
             return poses.get(currentPoseIndex);
         }
-        return null; // Return null if there is no valid current pose
+        return null;
     }
 
 }

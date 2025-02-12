@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierLine;
-import org.firstinspires.ftc.teamcode.utils.Arm;
+import org.firstinspires.ftc.teamcode.utils.ArmB;
 import org.firstinspires.ftc.teamcode.utils.ArmLift;
 import org.firstinspires.ftc.teamcode.utils.ServoPose;
 import org.firstinspires.ftc.teamcode.utils.ServoPoseFollower;
@@ -44,6 +44,7 @@ public class BlueClip extends OpMode{
     public void init() {
         follower = new Follower(hardwareMap);
         follower.setStartingPose(START_POSE);
+
 
         armLift = new ArmLift(hardwareMap);
         armLift.moveDown();
@@ -156,14 +157,14 @@ public class BlueClip extends OpMode{
 
     private void defineInitialServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0, 0.18, 0.25,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0, 0.28, 0.25,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0, 0.38, 0.25,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0, 0.48, 0.25,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0, 0.58, 0.25,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0, 0.68, 0.25,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0, 0.78, 0.25,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0, 0.88, 0.25,100)
+                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
+                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
+                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
+                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
+                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
+                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
+                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
+                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
@@ -171,20 +172,21 @@ public class BlueClip extends OpMode{
 
     private void defineSecondServoPoses(HardwareMap hardwareMap){
         List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(0.35, 0.35, 0.55, 0.3, 1, 0.88, 0.25, 100)
+                new ServoPose(0.35, 0.35, 0.55, 0.3, 1, 100)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
     }
 
     private void defineThirdServoPoses(HardwareMap hardwareMap){
         List<ServoPose> thirdPoses = Arrays.asList(
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.88, 0.25, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.78, 0.25, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.68, 0.25, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.58, 0.25, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.48, 0.25, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.38, 0.25, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.25, 0.25, 100)
+                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
+                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
+                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
+                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
+                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
+                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
+                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
+                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100)
 
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);

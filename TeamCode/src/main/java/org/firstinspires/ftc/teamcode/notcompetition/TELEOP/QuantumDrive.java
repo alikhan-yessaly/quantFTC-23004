@@ -30,7 +30,7 @@ public class QuantumDrive extends LinearOpMode {
         DcMotor armLift2 = hardwareMap.dcMotor.get("lift2");
         DcMotor extendB = hardwareMap.dcMotor.get("extendB");
 //        DcMotor armT = hardwareMap.dcMotor.get("armT");
-        ArmT armT1 = new ArmT(hardwareMap, "armT");
+//        ArmT armT1 = new ArmT(hardwareMap, "armT");
 //        Extender extendB1 = new Extender(hardwareMap, "extendB");
 
         TouchSensor touch = hardwareMap.touchSensor.get("touch");
@@ -182,7 +182,7 @@ public class QuantumDrive extends LinearOpMode {
                 } else if (gamepad2.dpad_down) {
 //                    armT.setTargetPosition(200);
 //                    armT.setPower(1);
-                    armT1.setPosition(200);
+//                    armT1.setPosition(200);
                     wristTServo.setPosition(0.3);
                 }
                 dpadUpIsPressed = gamepad2.dpad_up;
@@ -190,7 +190,7 @@ public class QuantumDrive extends LinearOpMode {
                 if ((gamepad2.dpad_left && !dpadLeftIsPressed)) {
 //                    armT.setTargetPosition(200);
 //                    armT.setPower(1);
-                    armT1.setPosition(200);
+//                    armT1.setPosition(200);
                 }
                 dpadLeftIsPressed = gamepad2.dpad_left;
             } else {
@@ -199,16 +199,16 @@ public class QuantumDrive extends LinearOpMode {
 //                    armT.setTargetPosition(5000);
 //                    armT.setPower(0.2);
 //                    armT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    armT1.setPosition(5000);
+//                    armT1.setPosition(5000);
                 } else if (gamepad2.dpad_down) {
 //                    int currentArmTPos = armT.getCurrentPosition();
 //                    armT.setTargetPosition(0);
 //                    armT.setPower(0.2);
 //                    armT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    armT1.setPosition(0);
+//                    armT1.setPosition(0);
                 } else {
 //                    armT.setPower(0);
-                    armT1.stop();
+//                    armT1.stop();
                 }
 
                 if (gamepad2.dpad_left) {
@@ -424,7 +424,7 @@ public class QuantumDrive extends LinearOpMode {
                 telemetry.addData("WristB Position", wristBServo.getPosition());
                 telemetry.addData("WristT Position", wristTServo.getPosition());
                 telemetry.addData("ArmB Position", armBServo.getPosition());
-                telemetry.addData("ArmT Position", armT1.getCurrentPosition());
+//                telemetry.addData("ArmT Position", armT1.getCurrentPosition());
                 telemetry.addData("Front Left Power", frontLeftTargetPower);
                 telemetry.addData("Back Left Power", backLeftTargetPower);
                 telemetry.addData("Front Right Power", frontRightTargetPower);

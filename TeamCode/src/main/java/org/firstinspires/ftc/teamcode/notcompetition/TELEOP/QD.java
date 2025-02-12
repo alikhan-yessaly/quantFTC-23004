@@ -27,10 +27,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 @TeleOp
 public class QD extends LinearOpMode{
    public static int liftOutLimit = -2500, liftInLimit = 0;
-   public static int extendOutLimit = 2500;
+   public static int extendOutLimit = 2500, extendInLimit = 0;
 
    public static double wristBPos = 0;
-   public static int armTDownPos = 0, armTClipPos = 5000, armTHighBasketPos = 5500;
+   public static int armTDownPos = 0, armTClipPos = 4000, armTHighBasketPos = 3000;
    public static double armT_Kd = 0.00001, armT_Kp = 0.001, armT_Ki = 0.001;
    public static double extender_Kd = 0.00001, extender_Kp = 0.0005, extender_Ki = 0.0005;
    public static double lift_kD = 0.0001, lift_kP = 0.001;
@@ -92,6 +92,7 @@ public class QD extends LinearOpMode{
        double extenderTargetPos = 0;
        double headingTarget = 0;
        int wristBPositionState = 0;
+       int clawTState = 0;
 
        //constants
        double armBPosition = 1;
@@ -100,9 +101,15 @@ public class QD extends LinearOpMode{
        boolean transferPiece = false;
        boolean clawTclosed = false;
        boolean armBbuttonPressed = false;
+       boolean needReset = false;
+       boolean modeEnabled = false;
+       boolean modeButtonPressed = false;
+       boolean clawTAnimating = false;
+       boolean clawOpening = false;
 
-       GamepadEx gp1 = new GamepadEx(gamepad1);
-       GamepadEx gp2 = new GamepadEx(gamepad2);
+
+       GamepadEx driver = new GamepadEx(gamepad1);
+       GamepadEx tool = new GamepadEx(gamepad2);
 
        waitForStart();
 
@@ -121,10 +128,11 @@ public class QD extends LinearOpMode{
        wristTServo.setPosition(0.5);
 
        ElapsedTime runTimer = new ElapsedTime();
+       ElapsedTime clawTimer = new ElapsedTime();
 
        while(opModeIsActive()){
-           gp1.readButtons();
-           gp2.readButtons();
+           driver.readButtons();
+           tool.readButtons();
 
            double deltaTime = ((double)runTimer.milliseconds() / 1000.0);
            runTimer.reset();
@@ -138,21 +146,22 @@ public class QD extends LinearOpMode{
            follower.update();
            double currentHeading = Math.toDegrees(follower.getPose().getHeading());
            telemetry.addData("Heading", currentHeading);
+           telemetry.addData("Target Heading", headingTarget);
 
            double forwardInput = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
            double strafeInput = -gamepad1.left_stick_x;
            double turnInput = -gamepad1.right_stick_x;
 
+           //=============================================== heading code ===============================================
+
            headingTarget += turnInput * turnSpeed * deltaTime;
 
-           //heading code
-
-           if(gp1.wasJustPressed(GamepadKeys.Button.B)){
+           if(driver.wasJustPressed(GamepadKeys.Button.B)){
                if((int)headingTarget%90 == 0) headingTarget -= 90;
                else headingTarget = Math.floor(headingTarget / 90.0 ) * 90.0;
            }
 
-           if(gp1.wasJustPressed(GamepadKeys.Button.X)){
+           if(driver.wasJustPressed(GamepadKeys.Button.X)){
                if((int)headingTarget % 90 == 0) headingTarget += 90;
                else headingTarget = Math.ceil(headingTarget/90.0) * 90.0;
            }
@@ -170,31 +179,43 @@ public class QD extends LinearOpMode{
 //           turnPower *= (12/ batteryVoltage);
 
 
-
-           drive.driveFieldCentric(strafeInput, forwardInput, turnPower, currentHeading);
-
-           //lift code
+             drive.driveRobotCentric(strafeInput,forwardInput,turnPower);
+//           drive.driveFieldCentric(strafeInput, forwardInput, turnPower, currentHeading);
+           //============================================ lift code ==================================================
 
            double liftInput = 0;
 
            if(gamepad2.right_bumper){
-               liftInput += 1;
+                liftTargetPos = 0;
            }
            else if(gamepad2.left_bumper && !touchSensor.isPressed()){
                transferStarted = true;
-               liftInput -= 1;
+               liftTargetPos = -2800;
            }
            else if(transferPiece && !transferStarted){
                if(lift1.getCurrentPosition() > -170){
                    lift1.stopMotor();
                    lift2.stopMotor();
                }
-               else { liftInput += 1; }
-               liftTargetPos = -500;
+               else {
+                   lift1.stopMotor();
+                   lift2.stopMotor();
+               }
+               liftTargetPos = -700;
            }
 
-           liftTargetPos -= liftInput * liftSpeed * deltaTime;
-           if(touchSensor.isPressed()) liftTargetPos = 0;
+          /* liftTargetPos -= liftInput * liftSpeed * deltaTime;*/
+           if(liftTargetPos == 0 && !touchSensor.isPressed() && !needReset) {
+               needReset = true;
+               liftTargetPos = 2000;
+           }
+           else if(touchSensor.isPressed() && needReset){
+               liftTargetPos = 0;
+               needReset = false;
+               lift1.stopAndResetEncoder();
+               lift2.stopAndResetEncoder();
+           }
+
 
            double lift1Pos = lift1.getCurrentPosition();
            double lift2Pos = lift2.getCurrentPosition();
@@ -211,7 +232,7 @@ public class QD extends LinearOpMode{
            lift1.set(lift1Power);
            lift2.set(lift2Power);
 
-           // extender code
+           // =======================================extender code=====================================
 
            double extenderInput = 0;
            if(gamepad2.right_trigger > 0.2) extenderInput += 1;
@@ -222,13 +243,14 @@ public class QD extends LinearOpMode{
            extender.set(extenderPD.calculate(extenderPos, extenderTargetPos));
 
            if(extenderTargetPos < 0) extenderPos = 0;
+           else if(extenderTargetPos < -1500) extenderPos = -1500;
 
            telemetry.addData("Extender Target Pos", extenderTargetPos);
            telemetry.addData("Extender Current Pos", extenderPos);
 
-           //armT code
+           //==========================armT code==============================
 
-           if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+           if (driver.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                armTargetPos = (armTargetPos == armTDownPos) ? armTHighBasketPos : armTDownPos;
            }
 
@@ -239,8 +261,8 @@ public class QD extends LinearOpMode{
            telemetry.addData("Arm Current Pos", armPos);
 
 
-           //Servo settings
-           //wristB
+           //==================================Servo settings=======================================
+           //=====================================wristB============================================
 
            if (gamepad2.x) {
                sleep(200);
@@ -267,33 +289,87 @@ public class QD extends LinearOpMode{
 
            telemetry.addData("wristB pos", wristBServo.getPosition());
 
-           //wristT
+           //================================================wristT==========================================
 
-           if(gp2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) wristTServo.setPosition(1);
-           else if(gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) wristTServo.setPosition(0);
+           if(tool.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) wristTServo.setPosition(1);
+           else if(tool.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) wristTServo.setPosition(0);
 
            telemetry.addData("wristT Pos", wristTServo.getPosition());
 
 
-           //clawT
+           //================================================clawT=============================================
 
-           if(gp2.wasJustPressed(GamepadKeys.Button.A)){
-               clawTclosed = !clawTclosed;
-               if(clawTclosed) clawTServo.setPosition(0.65);
-               else clawTServo.setPosition(0.35);
+//           if (tool.isDown(GamepadKeys.Button.A)) {
+//               transferPiece = false;
+//               liftTargetPos = 0;
+//           }
+//
+//           if (tool.wasJustReleased(GamepadKeys.Button.A)) {
+//               clawTAnimating = true;
+//               clawTState = 0;
+//               clawTimer.reset();
+//           }
+//
+//           if (clawTAnimating) {
+//               switch (clawTState) {
+//                   case 0:
+//                       clawTclosed = !clawTclosed;  // Close claw
+//                       clawTState++;
+//                       clawTimer.reset();
+//                       break;
+//                   case 1:
+//                       if (clawTimer.milliseconds() > 200) {
+//                           clawTServo.setPosition(0.65);
+//                           clawTState++;
+//                           clawTimer.reset();
+//                       }
+//                       break;
+//                   case 2:
+//                       if (clawTimer.milliseconds() > 200) {
+//                           clawBServo.setPosition(0.35);
+//                           clawTState++;
+//                           clawTimer.reset();
+//                       }
+//                       break;
+//                   case 3:
+//                       if (clawTimer.milliseconds() > 200) {
+//                           liftTargetPos = -2800;
+//                           clawTState++;
+//                           clawTimer.reset();
+//                       }
+//                       break;
+//                   case 4:
+//                       if (clawTimer.milliseconds() > 1000) {
+//                           armTargetPos = armTHighBasketPos;
+//                           clawTState++;
+//                           clawTimer.reset();
+//                       }
+//                       break;
+//                   case 5:
+//                       if(clawTimer.milliseconds() > 200){
+//                           wristTServo.setPosition(1);
+//                           clawTState++;
+//                           clawTimer.reset();
+//                       }
+//                       break;
+//               }
+//           }
 
-           }
 
+           telemetry.addData("ClawT state", clawTState);
+           telemetry.addData("ClawT Animation complete", clawTAnimating);
+           telemetry.addData("transferPiece state", transferPiece);
+           telemetry.addData("transferStarted state", transferStarted);
            telemetry.addData("clawT Pos", clawTServo.getPosition());
 
-           //clawB
+           //==========================================clawB====================================
 
-           if (gp2.wasJustPressed(GamepadKeys.Button.B)) {
+           if (tool.wasJustPressed(GamepadKeys.Button.B)) {
                clawBclosed = !clawBclosed;
 
                if (clawBclosed) {
                    // If the claw is closing and armBPosition is 0.15, lower the arm
-                   if (armBPosition == 0.22) {
+                   if (armBPosition == 0.4) {
                        armBPosition = 0;
                        armBServo.setPosition(armBPosition);
                        sleep(200);
@@ -303,7 +379,7 @@ public class QD extends LinearOpMode{
                    sleep(200);
 
                    if (armBPosition == 0) {
-                       armBPosition = 0.22;
+                       armBPosition = 0.4;
                        armBServo.setPosition(armBPosition);
                    }
                } else {
@@ -313,38 +389,175 @@ public class QD extends LinearOpMode{
            }
            telemetry.addData("clawB Pos", clawBServo.getPosition());
 
-           //armB
-           if (gamepad2.y && !armBbuttonPressed) {
-               transferStarted = false;
-               // Cycle through positions when button is pressed
-               if (armBPosition == 0.22) {
-                   armBPosition = 1; // Move to transfer position+
-                   if (!transferStarted) {
-                       transferPiece = true;
-                   }
-                   armTargetPos = 4500;
-                   wristBServo.setPosition(0.85);
-                   wristTServo.setPosition(0.3);
-                   clawBServo.setPosition(0.65);
-                   clawTServo.setPosition(0.35);
-                   extenderTargetPos = 0;
-
-               } else {
-                   transferPiece = false;
-                   armBPosition = 0.22; // Move back to starting position
-               }
-               armBbuttonPressed = true;
-           }
-            else if (!gamepad2.y) {
-               // Reset button press state when button is released
-               armBbuttonPressed = false;
-           }
-           armBServo.setPosition(armBPosition);
+           //==========================================armB=========================================
+//           if (gamepad2.y && !armBbuttonPressed) {
+//               transferStarted = false;
+//               // Cycle through positions when button is pressed
+//               if (armBPosition == 0.4) {
+//                   armBPosition = 1; // Move to transfer position+
+//                   if (!transferStarted) {
+//                       transferPiece = true;
+//                   }
+//                   armTargetPos = 0;
+//                   wristBServo.setPosition(0.85);
+//                   wristTServo.setPosition(0.2);
+//                   clawBServo.setPosition(0.65);
+//                   clawTServo.setPosition(0.35);
+//                   extenderTargetPos = 0;
+//
+//               } else {
+//                   transferPiece = false;
+//                   armBPosition = 0.4; // Move back to starting position
+//               }
+//               armBbuttonPressed = true;
+//           }
+//            else if (!gamepad2.y) {
+//               // Reset button press state when button is released
+//               armBbuttonPressed = false;
+//           }
+//           armBServo.setPosition(armBPosition);
 
            telemetry.addData("ArmB Pos", armBPosition);
 
+           //=======================================================================clip code================================================================
 
-           //dashboard telemetry
+
+
+           //======================================================================mode button=============================================================
+
+           if(gamepad2.guide && !modeButtonPressed){
+               modeEnabled = !modeEnabled;
+               modeButtonPressed = true;
+           }
+           else if(!gamepad2.guide) modeButtonPressed = false;
+
+           if(modeEnabled){
+               transferPiece = false;
+              if(tool.wasJustPressed(GamepadKeys.Button.Y)){
+                  clawTServo.setPosition(0.35);
+                  armTargetPos = 0;
+                  wristTServo.setPosition(0.6);
+              }
+              if(tool.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
+                  wristTServo.setPosition(0.5);
+                  armTargetPos = armTClipPos;
+              }
+              else if (tool.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                  armTargetPos = armTClipPos - 2000;
+                  clawTimer.reset();
+                  clawOpening = true;
+              }
+              if (clawOpening && clawTimer.milliseconds() > 300) {
+                   clawTServo.setPosition(0.35);
+                   clawOpening = false;
+              }
+              if(tool.wasJustPressed(GamepadKeys.Button.A)){
+                  armTargetPos = 450;
+                  clawTState = 0;
+                  clawTAnimating = true;
+                  clawTimer.reset();
+              }
+               if (clawTAnimating) {
+                   switch (clawTState) {
+                       case 0:
+                           if (clawTimer.milliseconds() > 300) {
+                               clawTServo.setPosition(0.65);
+                               clawTState++;
+                               clawTimer.reset();
+                           }
+                           break;
+                       case 1:
+                           clawTAnimating = false;
+                           break;
+                   }
+               }
+           }
+           else{
+               if (tool.isDown(GamepadKeys.Button.A)) {
+                   transferPiece = false;
+                   liftTargetPos = 0;
+               }
+
+               if (tool.wasJustReleased(GamepadKeys.Button.A)) {
+                   clawTAnimating = true;
+                   clawTState = 0;
+                   clawTimer.reset();
+               }
+
+               if (clawTAnimating) {
+                   switch (clawTState) {
+                       case 0:
+                           clawTclosed = !clawTclosed;
+                           clawTState++;
+                           clawTimer.reset();
+                           break;
+                       case 1:
+                           if (clawTimer.milliseconds() > 200) {
+                               clawTServo.setPosition(0.65);
+                               clawTState++;
+                               clawTimer.reset();
+                           }
+                           break;
+                       case 2:
+                           if (clawTimer.milliseconds() > 200) {
+                               clawBServo.setPosition(0.35);
+                               clawTState++;
+                               clawTimer.reset();
+                           }
+                           break;
+                       case 3:
+                           if (clawTimer.milliseconds() > 200) {
+                               liftTargetPos = -2800;
+                               clawTState++;
+                               clawTimer.reset();
+                           }
+                           break;
+                       case 4:
+                           if (clawTimer.milliseconds() > 1000) {
+                               armTargetPos = armTHighBasketPos;
+                               clawTState++;
+                               clawTimer.reset();
+                           }
+                           break;
+                       case 5:
+                           if(clawTimer.milliseconds() > 200){
+                               wristTServo.setPosition(1);
+                               clawTState++;
+                               clawTimer.reset();
+                           }
+                           break;
+                   }
+               }
+
+               if (gamepad2.y && !armBbuttonPressed) {
+                   transferStarted = false;
+                   // Cycle through positions when button is pressed
+                   if (armBPosition == 0.4) {
+                       armBPosition = 1; // Move to transfer position+
+                       if (!transferStarted) {
+                           transferPiece = true;
+                       }
+                       armTargetPos = 0;
+                       wristBServo.setPosition(0.85);
+                       wristTServo.setPosition(0.2);
+                       clawBServo.setPosition(0.35);
+                       clawTServo.setPosition(0.35);
+                       extenderTargetPos = 0;
+
+                   } else {
+                       transferPiece = false;
+                       armBPosition = 0.4; // Move back to starting position
+                   }
+                   armBbuttonPressed = true;
+               }
+               else if (!gamepad2.y) {
+                   // Reset button press state when button is released
+                   armBbuttonPressed = false;
+               }
+               armBServo.setPosition(armBPosition);
+           }
+
+           //=========================dashboard telemetry==========================
 
            TelemetryPacket packet = new TelemetryPacket();
            packet.put("Lift1 Position", lift1.getCurrentPosition());
@@ -352,7 +565,7 @@ public class QD extends LinearOpMode{
            packet.put("Lift Target Position", liftTargetPos);
            dashboard.sendTelemetryPacket(packet);
 
-            telemetry.addData("Target Heading", headingTarget);
+            telemetry.addData("Mode STATUS", modeEnabled);
 
 
             telemetry.update();
