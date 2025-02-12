@@ -81,31 +81,31 @@ public class HighBasketOne extends OpMode{
         servoPoseFollower.update();
         switch (currentState){
             case LIFT_TRANSFER:
-                setState(AutoState.FIRST_PATH);
+                if(lifts.isAtTarget()) setState(AutoState.FIRST_PATH);
                 break;
             case FIRST_PATH:
                 if(servoPoseFollower.isComplete()) setState(AutoState.EXTEND_OUT);
                 break;
             case EXTEND_OUT:
-                setState(AutoState.PICK_POSE);
+                if(extender.isAtTarget()) setState(AutoState.PICK_POSE);
                 break;
             case PICK_POSE:
                 if(servoPoseFollower.isComplete()) setState(AutoState.EXTEND_IN);
                 break;
             case EXTEND_IN:
-                setState(AutoState.SECOND_PATH);
+                if(extender.isAtTarget()) setState(AutoState.SECOND_PATH);
                 break;
             case SECOND_PATH:
                 if(follower.isCloseEnoughToEnd()) setState(AutoState.LIFT_TAKE);
                 break;
             case LIFT_TAKE:
-                setState(AutoState.TRANSFER_POSE);
+                if(lifts.isAtTarget()) setState(AutoState.TRANSFER_POSE);
                 break;
             case TRANSFER_POSE:
                 if(servoPoseFollower.isComplete()) setState(AutoState.LIFT_UP);
                 break;
             case LIFT_UP:
-                 setState(AutoState.ARM_UP);
+                 if(lifts.isAtTarget()) setState(AutoState.ARM_UP);
                 break;
             case ARM_UP:
                 setState(AutoState.BASKET_POSE);
@@ -113,10 +113,10 @@ public class HighBasketOne extends OpMode{
                 if(servoPoseFollower.isComplete()) setState(AutoState.ARM_DOWN);
                 break;
             case ARM_DOWN:
-                setState(AutoState.LIFT_DOWN);
+                if(armT.isAtTarget()) setState(AutoState.LIFT_DOWN);
                 break;
             case LIFT_DOWN:
-                setState(AutoState.RETURN_POSE);
+                if(lifts.isAtTarget())  setState(AutoState.RETURN_POSE);
                 break;
             case RETURN_POSE:
                 if(servoPoseFollower.isComplete()) setState(AutoState.COMPLETE);

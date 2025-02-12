@@ -136,18 +136,26 @@ public class HighBasket3 extends OpMode{
 
         if(currentState != null){
             switch (currentState){
-                // Grouped follower-based states
+                    // Grouped follower-based states
                 case FIRST_PATH: case SECOND_PATH: case THIRD_PATH: case FOURTH_PATH: case FIFTH_PATH: case SIXTH_PATH: case SEVENTH_PATH:
-                    if (follower.isCloseEnoughToEnd()) {
-                        setNextState();
-                    }
+                    if (follower.isCloseEnoughToEnd())  setNextState();
                     break;
 
-                // Grouped Motor-Based States
-                case ARM_UP: case ARM_DOWN: case LIFT_DOWN: case LIFT_TAKE: case LIFT_UP: case LIFT_TRANSFER:  case EXTEND_OUT: case EXTEND_IN:
-                    setNextState();
+                    // Grouped Arm-Based States
+                case ARM_UP: case ARM_DOWN:
+                    if(armT.isAtTarget()) setNextState();
                     break;
-                    
+
+                    // Grouped Arm-Based States
+                case LIFT_DOWN: case LIFT_TAKE: case LIFT_UP: case LIFT_TRANSFER:
+                    if(lifts.isAtTarget()) setNextState();
+                    break;
+
+                    //Grouped Extend-Based states
+                case EXTEND_OUT: case EXTEND_IN:
+                    if(extender.isAtTarget()) setNextState();
+                    break;
+
                     // Grouped servo-based states
                 case PICK_POSE: case TRANSFER_POSE: case BASKET_POSE: case RETURN_POSE:
                     if (servoPoseFollower.isComplete()) {

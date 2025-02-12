@@ -31,6 +31,11 @@ public class ArmTPD {
         armMotor.set(armPower);
     }
 
+    public boolean isAtTarget(){
+        double error = Math.abs(armTargetPos - armMotor.getCurrentPosition());
+        return error < 20;
+    }
+
     public double getCurrentPosition() {
         return armMotor.getCurrentPosition();
     }

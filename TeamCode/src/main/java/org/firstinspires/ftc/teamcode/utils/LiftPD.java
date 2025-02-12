@@ -27,6 +27,11 @@ public class LiftPD {
         lift1.resetEncoder();
         lift2.resetEncoder();
     }
+    public boolean isAtTarget(){
+        double error1 = Math.abs(liftTargetPos - lift1.getCurrentPosition());
+        double error2 = Math.abs(liftTargetPos - lift2.getCurrentPosition());
+        return error1 < 20 && error2 < 20;
+    }
     public void setTargetPosition(double position){
         liftTargetPos = position;
     }
@@ -47,9 +52,7 @@ public class LiftPD {
         lift2.set(lift2Power);
     }
 
-    public boolean isAtPosition() {
-        return lift1.atTargetPosition() && lift2.atTargetPosition();
-    }
+
     public void moveUp(){
         lift1.setTargetPosition(-2800);
         lift2.setTargetPosition(-2800);

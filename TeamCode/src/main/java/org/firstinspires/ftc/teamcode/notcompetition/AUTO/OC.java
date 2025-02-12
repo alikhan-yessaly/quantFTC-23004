@@ -72,13 +72,13 @@ public class OC extends OpMode{
                 if(servoPoseFollower.isComplete()) setState(AutoState.ARM_UP);
                 break;
             case ARM_UP:
-                setState(AutoState.FIRST_PATH);
+                if(armT.isAtTarget()) setState(AutoState.FIRST_PATH);
                 break;
             case FIRST_PATH:
                 if(follower.isCloseEnoughToEnd()) setState(AutoState.ARM_DOWN);
                 break;
             case ARM_DOWN:
-                setState(AutoState.SECOND_POSE);
+                if(armT.isAtTarget()) setState(AutoState.SECOND_POSE);
                 break;
             case SECOND_POSE:
                 if(servoPoseFollower.isComplete()) setState(AutoState.PARK_PATH);

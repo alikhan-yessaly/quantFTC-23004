@@ -133,11 +133,13 @@ public class OCMoreClips extends OpMode{
 
                 // Grouped Arm-Based States
                 case ARM_UP: case ARM_DOWN:
-                    setNextState();
+                    if(armT.isAtTarget()) setNextState();
+                    break;
 
                 // Grouped Extender-Based States
                 case EXTEND1: case EXTEND2: case EXTEND3:
-                    setNextState();
+                    if(extender.isAtTarget()) setNextState();
+                    break;
 
                 // Grouped servo-based states
                 case CLIP_RELEASE_POSE: case CLIP_DETECT_POSE: case CLIP_UP_POSE:
