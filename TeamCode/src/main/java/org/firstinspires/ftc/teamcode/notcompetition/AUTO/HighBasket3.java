@@ -129,6 +129,7 @@ public class HighBasket3 extends OpMode{
         lifts.setPID(lift_kP,0,lift_kD);
         follower.update();
         servoPoseFollower.update();
+
         if (currentState == null && !stateQueue.isEmpty()) {
             setNextState();
         }
@@ -192,6 +193,11 @@ public class HighBasket3 extends OpMode{
         switch(newState){
             case FIRST_PATH: follower.followPath(firstPath); break;
             case SECOND_PATH: follower.followPath(secondPath); break;
+            case THIRD_PATH: follower.followPath(thirdPath); break;
+            case FOURTH_PATH: follower.followPath(fourthPath); break;
+            case FIFTH_PATH: follower.followPath(fifthPath); break;
+            case SIXTH_PATH: follower.followPath(sixthPath); break;
+            case SEVENTH_PATH: follower.followPath(seventhPath); break;
             case PICK_POSE: definePickServoPoses(hardwareMap); servoPoseFollower.start(); break;
             case TRANSFER_POSE: defineTransferServoPoses(hardwareMap); servoPoseFollower.start(); break;
             case BASKET_POSE: defineBasketServoPoses(hardwareMap); servoPoseFollower.start(); break;
