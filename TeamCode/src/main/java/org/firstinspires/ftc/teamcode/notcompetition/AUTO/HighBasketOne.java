@@ -149,8 +149,8 @@ public class HighBasketOne extends OpMode{
             case RETURN_POSE: defineReturnServoPoses(hardwareMap); servoPoseFollower.start(); break;
             case ARM_UP: armT.setTargetPosition(4000); break;
             case ARM_DOWN: armT.setTargetPosition(0); break;
-            case EXTEND_OUT: extender.setTargetPosition(-1500);
-            case EXTEND_IN: extender.setTargetPosition(0);
+            case EXTEND_OUT: extender.setTargetPosition(-1500); break;
+            case EXTEND_IN: extender.setTargetPosition(0); break;
             case LIFT_UP: lifts.moveUp(); break;
             case LIFT_DOWN: lifts.moveDown(); break;
             case LIFT_TRANSFER: lifts.setTargetPosition(-700); break;
