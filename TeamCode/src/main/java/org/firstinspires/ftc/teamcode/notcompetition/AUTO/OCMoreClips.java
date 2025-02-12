@@ -105,7 +105,6 @@ public class OCMoreClips extends OpMode{
         stateQueue.add(AutoState.PARK_PATH);
         stateQueue.add(AutoState.COMPLETE);
 
-
         setNextState();
     }
 

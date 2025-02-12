@@ -21,11 +21,12 @@ public class LiftPD {
         lift2PD = new PDController(0,0);
 
         liftTargetPos = 0;
+    }
 
+    public void resetEncoder(){
         lift1.resetEncoder();
         lift2.resetEncoder();
     }
-
     public void setTargetPosition(double position){
         liftTargetPos = position;
     }
