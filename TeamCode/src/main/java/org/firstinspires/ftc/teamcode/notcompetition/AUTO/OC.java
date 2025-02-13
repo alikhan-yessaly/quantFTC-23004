@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "Dava1Clip", group = "Autonomous")
+@Autonomous(name = "1Clip", group = "Autonomous")
 public class OC extends OpMode{
 
     private enum AutoState{
@@ -33,7 +33,7 @@ public class OC extends OpMode{
     private ServoPoseFollower servoPoseFollower;
     private ArmTPD armT;
 
-    private PathChain firstPath, secondPath, thirdPath, firstPose, secondPose, thirdPose, liftUp, liftDown, parkPath;
+    private PathChain firstPath, parkPath;
     public static double armT_kD = 0.00001, armT_kP = 0.001;
 
     private static final Pose START_POSE = new Pose(9.00, 58.00, Math.toRadians(180));
@@ -42,6 +42,8 @@ public class OC extends OpMode{
     public void init(){
         follower = new Follower(hardwareMap);
         follower.setStartingPose(START_POSE);
+
+        armT = new ArmTPD(hardwareMap);
 
         defineInitialServoPoses(hardwareMap);
         servoPoseFollower.start();
@@ -70,13 +72,13 @@ public class OC extends OpMode{
                 if(servoPoseFollower.isComplete()) setState(AutoState.ARM_UP);
                 break;
             case ARM_UP:
-                setState(AutoState.FIRST_PATH);
+                if(armT.isAtTarget()) setState(AutoState.FIRST_PATH);
                 break;
             case FIRST_PATH:
                 if(follower.isCloseEnoughToEnd()) setState(AutoState.ARM_DOWN);
                 break;
             case ARM_DOWN:
-                setState(AutoState.SECOND_POSE);
+                if(armT.isAtTarget()) setState(AutoState.SECOND_POSE);
                 break;
             case SECOND_POSE:
                 if(servoPoseFollower.isComplete()) setState(AutoState.PARK_PATH);

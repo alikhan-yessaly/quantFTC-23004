@@ -7,7 +7,7 @@
 //import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 //import com.qualcomm.robotcore.hardware.HardwareMap;
 //import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierLine;
-//import org.firstinspires.ftc.teamcode.utils.ArmTPD;
+//import org.firstinspires.ftc.teamcode.utils.Arm;
 //import org.firstinspires.ftc.teamcode.utils.ArmLift;
 //import org.firstinspires.ftc.teamcode.utils.ServoPose;
 //import org.firstinspires.ftc.teamcode.utils.ServoPoseFollower;
