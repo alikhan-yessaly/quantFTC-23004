@@ -21,6 +21,11 @@ public class ExtenderPD {
     public void resetEncoder() { extenderMotor.resetEncoder(); }
     public void setTargetPosition(double position) { extenderTargetPos = position; }
 
+    public boolean isAtTarget(){
+        double error = Math.abs(extenderTargetPos - extenderMotor.getCurrentPosition());
+        return error < 20;
+    }
+
     public void setPID(double kP, double kI, double kD){
         extenderPD.setPID(kP, kI, kD);
     }

@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode.notcompetition.AUTO;
 
-import static org.firstinspires.ftc.teamcode.utils.ArmLift.CLIP_DOWN_POSITION;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierLine;
-import org.firstinspires.ftc.teamcode.utils.ArmB;
-import org.firstinspires.ftc.teamcode.utils.ArmLift;
 import org.firstinspires.ftc.teamcode.utils.ServoPose;
 import org.firstinspires.ftc.teamcode.utils.ServoPoseFollower;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
@@ -27,16 +23,13 @@ import java.util.List;
 public class BlueClip extends OpMode{
 
     private enum AutoState {
-        INITIALIZE, FIRST_PATH, CLIP1, SECOND_PATH, THIRD_PATH, FIRST_POSE, SECOND_POSE, THIRD_POSE, LIFT_UP, LIFT_DOWN, RETURN_POSE, COMPLETE;
+        FIRST_PATH,CLIP1,SECOND_PATH,CLIP2_TAKE,THIRD_PATH,CLIP2,FOURTH_PATH,CLIP3_TAKE,FIFTH_PATH, CLIP3, COMPLETE;
     }
-
-    private AutoState currentState = AutoState.INITIALIZE;
+    private AutoState currentState = AutoState.FIRST_PATH;
     private Timer opmodeTimer = new Timer();
     private Follower follower;
     private ServoPoseFollower servoPoseFollower;
-    private ArmLift armLift;
-
-    private PathChain firstPath, secondPath, thirdPath, firstPose, secondPose, liftUp, thirdPose, liftDown, parkPath;
+    private PathChain firstPath, secondPath, thirdPath,fourthPath, fifthPath, firstPose, secondPose, liftUp, thirdPose, liftDown, parkPath;
 
     private static final Pose START_POSE = new Pose(9.00, 58.00, Math.toRadians(180));
 
@@ -46,25 +39,22 @@ public class BlueClip extends OpMode{
         follower.setStartingPose(START_POSE);
 
 
-        armLift = new ArmLift(hardwareMap);
-        armLift.moveDown();
-
         defineInitialServoPoses(hardwareMap);
         servoPoseFollower.start();
 
         telemetry.addData("Init Status", "Initialized with starting pose and servo positions.");
         telemetry.update();
 
+        firstPath = buildFirstPath();
+        secondPath = buildSecondPath();
+        thirdPath = buildThirdPath();
+        fourthPath = buildFourthPath();
+        fifthPath = buildFifthPath();
     }
 
     @Override
     public void start(){
-        firstPath = buildFirstPath();
-        parkPath = ParkPath();
-//        thirdPath = ThirdPath();
-
-        setState(AutoState.LIFT_UP);
-
+        setState(AutoState.FIRST_PATH);
     }
 
     @Override
@@ -72,26 +62,37 @@ public class BlueClip extends OpMode{
         follower.update();
         servoPoseFollower.update();
         switch (currentState){
-            case FIRST_POSE:
-                if(servoPoseFollower.isComplete()) setState(AutoState.LIFT_UP);
-                break;
-            case LIFT_UP:
-                setState(AutoState.FIRST_PATH);
-                break;
             case FIRST_PATH:
-                if(follower.isCloseEnoughToEnd()) setState(AutoState.LIFT_DOWN);
+                if(follower.isCloseEnoughToEnd()) setState(AutoState.CLIP1);
                 break;
-            case LIFT_DOWN:
-                setState(AutoState.SECOND_POSE);
-                break;
-            case SECOND_POSE:
+            case CLIP1:
                 if(servoPoseFollower.isComplete()) setState(AutoState.SECOND_PATH);
                 break;
             case SECOND_PATH:
-                if(follower.isCloseEnoughToEnd()) setState(AutoState.THIRD_POSE);
+                if(follower.isCloseEnoughToEnd()) setState(AutoState.CLIP2_TAKE);
                 break;
-            case THIRD_POSE:
+            case CLIP2_TAKE:
+                if(servoPoseFollower.isComplete()) setState(AutoState.THIRD_PATH);
+                break;
+            case THIRD_PATH:
+                if(follower.isCloseEnoughToEnd()) setState(AutoState.CLIP2);
+                break;
+            case CLIP2:
+                if(servoPoseFollower.isComplete()) setState(AutoState.FOURTH_PATH);
+                break;
+            case FOURTH_PATH:
+                if(follower.isCloseEnoughToEnd()) setState(AutoState.CLIP3_TAKE);
+                break;
+            case CLIP3_TAKE:
+                if(servoPoseFollower.isComplete()) setState(AutoState.FIFTH_PATH);
+                break;
+            case FIFTH_PATH:
+                if(follower.isCloseEnoughToEnd()) setState(AutoState.CLIP3);
+                break;
+            case CLIP3:
                 if(servoPoseFollower.isComplete()) setState(AutoState.COMPLETE);
+                break;
+
             case COMPLETE:
                 telemetry.addData("Status", "Autonomous Complete");
                 break;
@@ -101,7 +102,7 @@ public class BlueClip extends OpMode{
         telemetry.addData("Follower X", follower.getPose().getX());
         telemetry.addData("Follower Y", follower.getPose().getY());
         telemetry.addData("Heading", Math.toRadians(follower.getPose().getHeading()));
-        telemetry.addData("Lifts", armLift.getCurrentPosition());
+//        telemetry.addData("Lifts", armLift.getCurrentPosition());
         telemetry.update();
     }
 
@@ -111,19 +112,22 @@ public class BlueClip extends OpMode{
         telemetry.update();
     }
 
+
     private void setState(AutoState newState){
         currentState = newState;
         opmodeTimer.resetTimer();
         switch (newState) {
-            case FIRST_PATH: follower.followPath(firstPath); break;
-            case CLIP1: armLift.moveClipDown(); break;
-            case SECOND_PATH: follower.followPath(parkPath); break;
-            case THIRD_PATH: follower.followPath(thirdPath); break;
-            case LIFT_DOWN: armLift.moveDown(); break;
-            case LIFT_UP: armLift.moveUp(); break;
-            case FIRST_POSE: defineInitialServoPoses(hardwareMap); servoPoseFollower.start(); break;
-            case SECOND_POSE: defineSecondServoPoses(hardwareMap); servoPoseFollower.start(); break;
-            case THIRD_POSE: defineThirdServoPoses(hardwareMap); servoPoseFollower.start(); armLift.stop(); break;
+            case FIRST_PATH: follower.followPath(firstPath); defineFirstServoPoses(hardwareMap);break;
+            case CLIP1:  defineClipSetServoPoses(hardwareMap); servoPoseFollower.start(); break;
+            case SECOND_PATH: follower.followPath(secondPath);defineClipPrepareServoPoses(hardwareMap); break;
+            case CLIP2_TAKE: defineClipTakeServoPoses(hardwareMap); break;
+            case THIRD_PATH: follower.followPath(thirdPath); defineFirstServoPoses(hardwareMap);break;
+            case CLIP2: defineClipSetServoPoses(hardwareMap); break;
+            case FOURTH_PATH: follower.followPath(fourthPath); defineClipPrepareServoPoses(hardwareMap);break;
+            case CLIP3_TAKE: defineClipTakeServoPoses(hardwareMap); break;
+            case FIFTH_PATH: follower.followPath(fifthPath); defineFirstServoPoses(hardwareMap);break;
+            case CLIP3: defineClipSetServoPoses(hardwareMap); break;
+            case COMPLETE: stop(); break;
 
         }
     }
@@ -134,7 +138,59 @@ public class BlueClip extends OpMode{
                         // Line 1
                         new BezierLine(
                                 new Point(9.000, 58.000, Point.CARTESIAN),
-                                new Point(28.747, 71.226, Point.CARTESIAN)
+                                new Point(39.2, 76.00, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .build();
+    }
+
+    private PathChain buildSecondPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 2
+                        new BezierLine(
+                                new Point(39.200, 76.000, Point.CARTESIAN),
+                                new Point(9.000, 24.000, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .build();
+    }
+
+    private PathChain buildThirdPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 3
+                        new BezierLine(
+                                new Point(9.000, 24.000, Point.CARTESIAN),
+                                new Point(39.200, 74.000, Point.CARTESIAN)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .build();
+    }
+
+    private PathChain buildFourthPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 3
+                        new BezierLine(
+                                new Point(39.200, 74.000, Point.CARTESIAN),
+                                new Point(9.000, 24.000, Point.CARTESIAN)
+
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .build();
+    }
+    private PathChain buildFifthPath() {
+        return follower.pathBuilder()
+                .addPath(
+                        // Line 3
+                        new BezierLine(
+                                new Point(9.000, 24.000, Point.CARTESIAN),
+                                new Point(39.200, 72.000, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -155,56 +211,51 @@ public class BlueClip extends OpMode{
                 .build();
     }
 
-    private void defineInitialServoPoses(HardwareMap hardwareMap) {
+    private void defineClipSetServoPoses(HardwareMap hardwareMap) {
         List<ServoPose> initialPoses = Arrays.asList(
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100),
-                new ServoPose(0.65, 0.35, 0.5, 0.3, 0,100)
+                new ServoPose(0.65, 0.35, 0.55, 0.4, 1,2000,300),
+                new ServoPose(0.35, 0.35, 0.55, 0.4, 1,2000,100)
+
+        );
+        servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
+    }
+
+    private void defineClipPrepareServoPoses(HardwareMap hardwareMap) {
+        List<ServoPose> initialPoses = Arrays.asList(
+                new ServoPose(0.35, 0.35, 0.55, 0.6, 1,0,300)
+
+        );
+        servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
+    }
+
+    private void defineClipTakeServoPoses(HardwareMap hardwareMap) {
+        List<ServoPose> initialPoses = Arrays.asList(
+                new ServoPose(0.35, 0.35, 0.55, 0.6, 1,0,300),
+                new ServoPose(0.35, 0.35, 0.55, 0.6, 1,450,300),
+                new ServoPose(0.7, 0.35, 0.55, 0.6, 1,450,200)
+
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
     }
 
 
-    private void defineSecondServoPoses(HardwareMap hardwareMap){
+    private void defineInitialServoPoses(HardwareMap hardwareMap) {
+        List<ServoPose> initialPoses = Arrays.asList(
+                new ServoPose(0.65, 0.35, 0.55, 1.0, 1,0,100)
+        );
+        servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
+    }
+
+
+    private void defineFirstServoPoses(HardwareMap hardwareMap){
         List<ServoPose> secondPoses = Arrays.asList(
-                new ServoPose(0.35, 0.35, 0.55, 0.3, 1, 100)
+                new ServoPose(0.65, 0.35, 0.55, 1.0, 1,1000,100),
+                new ServoPose(0.65, 0.35, 0.55, 0.8, 1,2000,100),
+                new ServoPose(0.65, 0.35, 0.55, 0.6, 1,3000,100),
+                new ServoPose(0.65, 0.35, 0.55, 0.5, 1,4000,100)
         );
         servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
     }
-
-    private void defineThirdServoPoses(HardwareMap hardwareMap){
-        List<ServoPose> thirdPoses = Arrays.asList(
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100),
-                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100)
-
-        );
-        servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);
-     }
-
-//    private PathChain ThirdPath(){
-//        return follower.pathBuilder()
-//                .addPath(
-//                        // Line 3
-//                        new BezierLine(
-//                                new Point(30.280, 31.180, Point.CARTESIAN),
-//                                new Point(30.280, 31.180, Point.CARTESIAN)
-//                        )
-//                )
-//                .setLinearHeadingInterpolation(Math.toRadians(-35), Math.toRadians(-150))
-//                .build();
-//
-//    }
 
 
 

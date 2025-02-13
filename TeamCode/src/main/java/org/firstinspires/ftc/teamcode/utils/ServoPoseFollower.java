@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.pedroPathing.util.Timer;
+import org.firstinspires.ftc.teamcode.utils.ArmTPD;
 
 import java.util.List;
 
@@ -12,14 +13,14 @@ public class ServoPoseFollower {
     private final Claw claw;
     private List<ServoPose> poses;
     private final Timer poseTimer = new Timer();
-
+    private ArmTPD armTPD;
     private int currentPoseIndex = 0;
     private boolean isComplete = false;
-
     public ServoPoseFollower(HardwareMap hardwareMap, List<ServoPose> poses) {
         this.armB = new ArmB(hardwareMap);
         this.wrist = new Wrist(hardwareMap);
         this.claw = new Claw(hardwareMap);
+        this.armTPD = new ArmTPD(hardwareMap);
         this.poses = poses;
     }
 
@@ -34,6 +35,7 @@ public class ServoPoseFollower {
 
 
     public void update() {
+        armTPD.update();
         if (isComplete) return;
 
         if (poseTimer.getElapsedTime() >= poses.get(currentPoseIndex).getDuration()) {
@@ -58,6 +60,7 @@ public class ServoPoseFollower {
         claw.setPosition(pose.getClawBPosition(), pose.getClawTPosition());
         wrist.setPosition(pose.getWristBPosition(), pose.getWristTPosition());
         armB.setPosition(pose.getArmBPosition());
+        armTPD.setTargetPosition(pose.getArmTPosition());
 
     }
 

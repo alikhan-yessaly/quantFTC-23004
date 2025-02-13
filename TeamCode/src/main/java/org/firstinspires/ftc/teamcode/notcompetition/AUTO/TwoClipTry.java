@@ -36,7 +36,7 @@
 //    private ServoPoseFollower servoPoseFollower;
 //    private ArmLift armLift;
 //
-//    private PathChain firstPath, secondPath, thirdPath, fourthPath, fifthPath, sixthPath, firstPose, secondPose, liftUp, thirdPose, liftDown, parkPath;
+//    private PathChain firstPath, thirdPath, fourthPath, fifthPath, sixthPath, firstPose, secondPose, liftUp, thirdPose, liftDown, parkPath;
 //
 //    private static final Pose START_POSE = new Pose(9.00, 58.00, Math.toRadians(180));
 //
@@ -59,7 +59,6 @@
 //    @Override
 //    public void start(){
 //        firstPath = buildFirstPath();
-//        secondPath = SecondPath();
 //        thirdPath = ThirdPath();
 //        fourthPath = FourthPath();
 //        fifthPath = FifthPath();
@@ -183,14 +182,7 @@
 //
 //    private void defineInitialServoPoses(HardwareMap hardwareMap) {
 //        List<ServoPose> initialPoses = Arrays.asList(
-//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 0.18, 0.25,100),
-//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 0.28, 0.25,100),
-//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 0.38, 0.25,100),
-//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 0.48, 0.25,100),
-//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 0.58, 0.25,100),
-//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 0.68, 0.25,100),
-//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 0.78, 0.25,100),
-//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 0.88, 0.25,100)
+//                new ServoPose(0.65, 0.35, 0.55, 0.3, 1, 100)
 //        );
 //        servoPoseFollower = new ServoPoseFollower(hardwareMap, initialPoses);
 //    }
@@ -198,28 +190,28 @@
 //
 //    private void defineSecondServoPoses(HardwareMap hardwareMap){
 //        List<ServoPose> secondPoses = Arrays.asList(
-//                new ServoPose(0.35, 0.35, 0.55, 0.3, 1, 0.88, 0.25, 100)
+//                new ServoPose(0.35, 0.35, 0.55, 0.3, 1, 100)
 //        );
 //        servoPoseFollower = new ServoPoseFollower(hardwareMap, secondPoses);
 //    }
 //
 //    private void defineParkServoPoses(HardwareMap hardwareMap){
 //        List<ServoPose> parkPoses = Arrays.asList(
-//                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.25, 0.25, 100)
+//                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100)
 //        );
 //        servoPoseFollower = new ServoPoseFollower(hardwareMap, parkPoses);
 //    }
 //
 //    private void defineThirdServoPoses(HardwareMap hardwareMap){
 //        List<ServoPose> thirdPoses = Arrays.asList(
-//                new ServoPose(0.65, 0.35, 0.5,0.3,1, 0.88, 0.25, 100)
+//                new ServoPose(0.65, 0.35, 0.5,0.3,1, 100)
 //        );
 //        servoPoseFollower = new ServoPoseFollower(hardwareMap, thirdPoses);
 //    }
 //
 //    private void defineFourthServoPoses(HardwareMap hardwareMap){
 //        List<ServoPose> fourthPoses = Arrays.asList(
-//                new ServoPose(0.35, 0.35, 0.5,0.3,1, 0.88, 0.25, 100)
+//                new ServoPose(0.35, 0.35, 0.5,0.3,1, 100)
 //        );
 //        servoPoseFollower = new ServoPoseFollower(hardwareMap, fourthPoses);
 //    }

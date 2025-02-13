@@ -30,7 +30,7 @@ public class QD extends LinearOpMode{
    public static int extendOutLimit = 2500, extendInLimit = 0;
 
    public static double wristBPos = 0;
-   public static int armTDownPos = 0, armTClipPos = 4000, armTHighBasketPos = 3000;
+   public static int armTDownPos = 0, armTClipPos = 4000, armTHighBasketPos = 3000, armTTransferPos = 200;
    public static double armT_Kd = 0.00001, armT_Kp = 0.001, armT_Ki = 0.001;
 //   public static double extender_Kd = 0.00001, extender_Kp = 0.0005, extender_Ki = 0.0005;
    public static double extender_Kd = 0.00001, extender_Kp = 0.002, extender_Ki = 0.005;
@@ -73,8 +73,8 @@ public class QD extends LinearOpMode{
        wristBServo.setPwmRange(pwmRange);
        wristTServo.setPwmRange(pwmRange);
 
-       frontRightMotor.setInverted(true);
-       backRightMotor.setInverted(true);
+       frontLeftMotor.setInverted(true);
+       backLeftMotor.setInverted(true);
        lift2.setInverted(true);
 
        PDController lift1PD = new PDController(0,0);
@@ -97,7 +97,7 @@ public class QD extends LinearOpMode{
 
        //constants
        double armBPosition = 1;
-       boolean clawBclosed = false;
+       boolean clawBclosed = true;
        boolean transferStarted = false;
        boolean transferPiece = false;
        boolean clawTclosed = false;
@@ -130,6 +130,11 @@ public class QD extends LinearOpMode{
 
        ElapsedTime runTimer = new ElapsedTime();
        ElapsedTime clawTimer = new ElapsedTime();
+       ElapsedTime clawBTimer = new ElapsedTime();
+
+       boolean delayFlag = false;
+       boolean catchMode = false;
+
 
        while(opModeIsActive()){
            driver.readButtons();
@@ -149,7 +154,7 @@ public class QD extends LinearOpMode{
            telemetry.addData("Heading", currentHeading);
            telemetry.addData("Target Heading", headingTarget);
 
-           double forwardInput = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+           double forwardInput = gamepad1.left_stick_y; // Remember, Y stick value is reversed
            double strafeInput = -gamepad1.left_stick_x;
            double turnInput = -gamepad1.right_stick_x;
 
@@ -180,7 +185,7 @@ public class QD extends LinearOpMode{
 //           turnPower *= (12/ batteryVoltage);
 
 
-             drive.driveRobotCentric(strafeInput,forwardInput,turnPower);
+           drive.driveRobotCentric(strafeInput,forwardInput,turnPower);
 //           drive.driveFieldCentric(strafeInput, forwardInput, turnPower, currentHeading);
            //============================================ lift code ==================================================
 
@@ -268,9 +273,7 @@ public class QD extends LinearOpMode{
 
            //==================================Servo settings=======================================
            //=====================================wristB============================================
-
-           if (gamepad2.x) {
-               sleep(200);
+           if(tool.wasJustPressed(GamepadKeys.Button.X)){
 
                // Increment position state, looping back to 0 when reaching 3
                wristBPositionState = (wristBPositionState + 1) % 4;
@@ -372,27 +375,53 @@ public class QD extends LinearOpMode{
 
            if (tool.wasJustPressed(GamepadKeys.Button.B)) {
                clawBclosed = !clawBclosed;
+               clawBTimer.reset();
+               if (!clawBclosed && armBPosition == 0.4 && !catchMode) {
+                   catchMode = true;
+               }else {
+                   // Open the claw logic
+                   clawBServo.setPosition(0.35);
 
-               if (clawBclosed) {
-                   // If the claw is closing and armBPosition is 0.15, lower the arm
-                   if (armBPosition == 0.4) {
-                       armBPosition = 0;
+               }
+
+//               if (clawBclosed) {
+//                   // If the claw is closing and armBPosition is 0.15, lower the arm
+//                   if (armBPosition == 0.4) {
+//                       armBPosition = 0;
+//                       armBServo.setPosition(armBPosition);
+//                       sleep(200);
+//                   }
+//
+//                   clawBServo.setPosition(0.65); // Close claw
+//                   sleep(200);
+//
+//                   if (armBPosition == 0) {
+//                       armBPosition = 0.4;
+//                       armBServo.setPosition(armBPosition);
+//                   }
+//               } else {
+//                   // Open the claw
+//                   clawBServo.setPosition(0.35);
+//               }
+           }
+               if(catchMode) {
+                   // If the armBPosition is 0.4, and the claw needs to close, lower the arm with a delay
+                   if (armBPosition == 0.4 && !delayFlag) {
+                       armBPosition = 0.0;
                        armBServo.setPosition(armBPosition);
-                       sleep(200);
+                       delayFlag = true;  // Set the flag to prevent the action from triggering repeatedly
                    }
 
-                   clawBServo.setPosition(0.65); // Close claw
-                   sleep(200);
-
-                   if (armBPosition == 0) {
+                   // If enough time has passed (200ms), close the claw
+                   if (delayFlag && (clawBTimer.milliseconds() >= 200)) {
+                       clawBServo.setPosition(0.7);  // Close the claw
+                       delayFlag = false;  // Reset the flag after the action
                        armBPosition = 0.4;
                        armBServo.setPosition(armBPosition);
+                       catchMode = false;
                    }
-               } else {
-                   // Open the claw
-                   clawBServo.setPosition(0.35);
                }
-           }
+
            telemetry.addData("clawB Pos", clawBServo.getPosition());
 
            //==========================================armB=========================================
@@ -449,7 +478,7 @@ public class QD extends LinearOpMode{
                   armTargetPos = armTClipPos;
               }
               else if (tool.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                  armTargetPos = armTClipPos - 2000;
+                  armTargetPos = armTClipPos - 2000 ;
                   clawTimer.reset();
                   clawOpening = true;
               }
@@ -467,7 +496,7 @@ public class QD extends LinearOpMode{
                    switch (clawTState) {
                        case 0:
                            if (clawTimer.milliseconds() > 300) {
-                               clawTServo.setPosition(0.65);
+                               clawTServo.setPosition(0.7);
                                clawTState++;
                                clawTimer.reset();
                            }
@@ -499,7 +528,7 @@ public class QD extends LinearOpMode{
                            break;
                        case 1:
                            if (clawTimer.milliseconds() > 200) {
-                               clawTServo.setPosition(0.65);
+                               clawTServo.setPosition(0.7);
                                clawTState++;
                                clawTimer.reset();
                            }
@@ -527,13 +556,13 @@ public class QD extends LinearOpMode{
                            break;
                        case 5:
                            if(clawTimer.milliseconds() > 200){
-                               wristTServo.setPosition(1);
+                               wristTServo.setPosition(0.8);
                                clawTState++;
                                clawTimer.reset();
                            }
                            break;
                        case 6:
-                           clawTServo.setPosition(0.65);
+                           clawTServo.setPosition(0.7);
                            clawTAnimating = false;
                            break;
                    }
@@ -547,10 +576,10 @@ public class QD extends LinearOpMode{
                        if (!transferStarted) {
                            transferPiece = true;
                        }
-                       armTargetPos = 0;
+                       armTargetPos = armTTransferPos;
                        wristBServo.setPosition(0.85);
-                       wristTServo.setPosition(0.2);
-                       clawBServo.setPosition(0.65);
+                       wristTServo.setPosition(0.0);
+                       clawBServo.setPosition(0.7);
                        clawTServo.setPosition(0.35);
                        extenderTargetPos = 0;
 

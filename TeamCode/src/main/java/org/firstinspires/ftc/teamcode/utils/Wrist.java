@@ -21,8 +21,9 @@ public class Wrist {
         wristBServo = hardwareMap.get(ServoImplEx.class, "wristB");
         wristTServo = hardwareMap.get(ServoImplEx.class, "wristT");
 
-     /*   PwmControl.PwmRange pwmRange = new PwmControl.PwmRange(500, 2500);*/
-      /*  wristServo.setPwmRange(pwmRange);*/
+        PwmControl.PwmRange pwmRange = new PwmControl.PwmRange(500, 2500);
+        wristTServo.setPwmRange(pwmRange);
+        wristTServo.setPwmRange(pwmRange);
 
         // Initialize to the first position
         setPosition(POSITION_1, POSITION_1);

@@ -19,12 +19,14 @@
 //import java.util.ArrayList;
 //import java.util.Arrays;
 //import java.util.List;
+//import java.util.Queue;
+//import java.util.LinkedList;
 //
-//@Autonomous(name = "Dava3Clips", group = "Autonomous")
+//@Autonomous(name = "3Clips", group = "Autonomous")
 //public class OCMoreClips extends OpMode{
 //
 //    private enum AutoState{
-//        INITIALIZE, FIRST_PATH, SECOND_PATH, THIRD_PATH, FOURTH_PATH, FIFHT_PATH, SIXTH_PATH, SEVENTH_PATH, EIGHTH_PATH, NINTH_PATH, CLIP_DETECT_POSE, CLIP_UP_POSE, CLIP_RELEASE_POSE, PICK_POSE, PUT_POSE, ARM_UP, ARM_DOWN, PARK_PATH, COMPLETE;
+//        INITIALIZE, FIRST_PATH, SECOND_PATH, THIRD_PATH, FOURTH_PATH, FIFTH_PATH, SIXTH_PATH, SEVENTH_PATH, EIGHTH_PATH, NINTH_PATH, CLIP_DETECT_POSE, CLIP_UP_POSE, CLIP_RELEASE_POSE, PICK_POSE, PUT_POSE, ARM_UP, ARM_DOWN, EXTEND1, EXTEND2, EXTEND3,  PARK_PATH, COMPLETE;
 //    }
 //
 //    private AutoState currentState = AutoState.INITIALIZE;
@@ -33,6 +35,7 @@
 //    private ServoPoseFollower servoPoseFollower;
 //    private ArmTPD armT;
 //    private ExtenderPD extender;
+//    private Queue<AutoState> stateQueue = new LinkedList<>();
 //
 //    private PathChain firstPath, secondPath, thirdPath, fourthPath, fifthPath, sixthPath, seventhPath, eighthPath, ninthPath, parkPath;
 //    public static double armT_kD = 0.00001, armT_kP = 0.001;
@@ -44,6 +47,9 @@
 //    public void init(){
 //        follower = new Follower(hardwareMap);
 //        follower.setStartingPose(START_POSE);
+//
+//        extender = new ExtenderPD(hardwareMap);
+//        armT = new ArmTPD(hardwareMap);
 //
 //        defineInitialServoPoses(hardwareMap);
 //        servoPoseFollower.start();
@@ -68,7 +74,38 @@
 //        ninthPath = ninethPath();
 //        parkPath = parkPath();
 //
-//        setState(AutoState.ARM_UP);
+//        stateQueue.add(AutoState.ARM_UP);
+//        stateQueue.add(AutoState.FIRST_PATH);
+//        stateQueue.add(AutoState.ARM_DOWN);
+//        stateQueue.add(AutoState.CLIP_RELEASE_POSE);
+//        stateQueue.add(AutoState.SECOND_PATH);
+//        stateQueue.add(AutoState.EXTEND1);
+//        stateQueue.add(AutoState.PICK_POSE);
+//        stateQueue.add(AutoState.THIRD_PATH);
+//        stateQueue.add(AutoState.PUT_POSE);
+//        stateQueue.add(AutoState.FOURTH_PATH);
+//        stateQueue.add(AutoState.EXTEND2);
+//        stateQueue.add(AutoState.PICK_POSE);
+//        stateQueue.add(AutoState.FIFTH_PATH);
+//        stateQueue.add(AutoState.PUT_POSE);
+//        stateQueue.add(AutoState.SIXTH_PATH);
+//        stateQueue.add(AutoState.CLIP_DETECT_POSE);
+//        stateQueue.add(AutoState.CLIP_UP_POSE);
+//        stateQueue.add(AutoState.ARM_UP);
+//        stateQueue.add(AutoState.SEVENTH_PATH);
+//        stateQueue.add(AutoState.ARM_DOWN);
+//        stateQueue.add(AutoState.CLIP_RELEASE_POSE);
+//        stateQueue.add(AutoState.EIGHTH_PATH);
+//        stateQueue.add(AutoState.CLIP_DETECT_POSE);
+//        stateQueue.add(AutoState.CLIP_UP_POSE);
+//        stateQueue.add(AutoState.ARM_UP);
+//        stateQueue.add(AutoState.NINTH_PATH);
+//        stateQueue.add(AutoState.ARM_DOWN);
+//        stateQueue.add(AutoState.CLIP_RELEASE_POSE);
+//        stateQueue.add(AutoState.PARK_PATH);
+//        stateQueue.add(AutoState.COMPLETE);
+//
+//        setNextState();
 //    }
 //
 //    @Override
@@ -77,43 +114,47 @@
 //        extender.setPID(extender_kP, 0, extender_kD);
 //        follower.update();
 //        servoPoseFollower.update();
-//        switch (currentState){
-//            case ARM_UP:
-//                setState(AutoState.FIRST_PATH);
-//                break;
-//            case FIRST_PATH:
-//                if(follower.isCloseEnoughToEnd()) setState(AutoState.ARM_DOWN);
-//                break;
-//            case ARM_DOWN:
-//                setState(AutoState.CLIP_RELEASE_POSE);
-//                break;
-//            case CLIP_RELEASE_POSE:
-//                if(servoPoseFollower.isComplete()) setState(AutoState.SECOND_PATH);
-//                break;
-//            case SECOND_PATH:
-//                if(follower.isCloseEnoughToEnd()) setState(AutoState.PICK_POSE);
-//                break;
-//            case PICK_POSE:
-//                extender.setTargetPosition(-1200);
-//                if(servoPoseFollower.isComplete()) setState(AutoState.PUT_POSE);
-//                break;
-//            case PUT_POSE:
-//                if(servoPoseFollower.isComplete()) setState(AutoState.THIRD_PATH);
-//                break;
-//            case THIRD_PATH:
-//                if(follower.isCloseEnoughToEnd()) setState(AutoState.PICK_POSE);
-//                break;
-//            case PICK_POSE:
-//                extender.setTargetPosition(-1200);
-//                if(servoPoseFollower.isComplete()) setState(AutoState.PUT_POSE);
-//                break;
 //
-////            case PARK_PATH:
-////                if(follower.isCloseEnoughToEnd()) setState(AutoState.COMPLETE);
-////                break;
-////            case COMPLETE:
-////                telemetry.addData("Status", "Autonomous Complete");
-////                break;
+//        if (currentState == null && !stateQueue.isEmpty()) {
+//            setNextState();
+//        }
+//
+//        if(currentState != null){
+//            switch (currentState){
+//                // Grouped follower-based states
+//                case FIRST_PATH: case SECOND_PATH: case THIRD_PATH:
+//                case FOURTH_PATH: case FIFTH_PATH: case SIXTH_PATH:
+//                case SEVENTH_PATH: case EIGHTH_PATH: case NINTH_PATH:
+//                case PARK_PATH:
+//                    if (follower.isCloseEnoughToEnd()) {
+//                        setNextState();
+//                    }
+//                    break;
+//
+//                // Grouped Arm-Based States
+//                case ARM_UP: case ARM_DOWN:
+//                    if(armT.isAtTarget()) setNextState();
+//                    break;
+//
+//                // Grouped Extender-Based States
+//                case EXTEND1: case EXTEND2: case EXTEND3:
+//                    if(extender.isAtTarget()) setNextState();
+//                    break;
+//
+//                // Grouped servo-based states
+//                case CLIP_RELEASE_POSE: case CLIP_DETECT_POSE: case CLIP_UP_POSE:
+//                case PICK_POSE: case PUT_POSE:
+//                    if (servoPoseFollower.isComplete()) {
+//                        setNextState();
+//                    }
+//                    break;
+//
+//                case COMPLETE:
+//                    telemetry.addData("Status", "Autonomous Complete");
+//                    break;
+//
+//        }
+//
 //        }
 //
 //        telemetry.addData("Current State", currentState);
@@ -130,7 +171,17 @@
 //        telemetry.update();
 //    }
 //
-//    private void setState(AutoState newState){
+//    private void setNextState() {
+//        if (!stateQueue.isEmpty()) {
+//            currentState = stateQueue.poll();
+//            opmodeTimer.resetTimer();
+//            applyStateAction(currentState);
+//        } else {
+//            currentState = null;
+//        }
+//    }
+//
+//    private void applyStateAction(AutoState newState){
 //        currentState = newState;
 //        opmodeTimer.resetTimer();
 //        switch(newState){
@@ -138,7 +189,7 @@
 //            case SECOND_PATH: follower.followPath(secondPath); break;
 //            case THIRD_PATH: follower.followPath(thirdPath); break;
 //            case FOURTH_PATH: follower.followPath(fourthPath); break;
-//            case FIFHT_PATH: follower.followPath(fifthPath); break;
+//            case FIFTH_PATH: follower.followPath(fifthPath); break;
 //            case SIXTH_PATH: follower.followPath(sixthPath); break;
 //            case SEVENTH_PATH: follower.followPath(seventhPath); break;
 //            case EIGHTH_PATH: follower.followPath(eighthPath); break;
@@ -146,6 +197,9 @@
 //            case PARK_PATH: follower.followPath(parkPath); break;
 //            case ARM_UP: armT.setTargetPosition(4000); break;
 //            case ARM_DOWN: armT.setTargetPosition(2000); break;
+//            case EXTEND1: extender.setTargetPosition(-1000); break;
+//            case EXTEND2: extender.setTargetPosition(-1200); break;
+//            case EXTEND3: extender.setTargetPosition(-1500); break;
 //            case CLIP_DETECT_POSE: armT.setTargetPosition(0); defineClipDetectServoPoses(hardwareMap); servoPoseFollower.start(); break;
 //            case CLIP_UP_POSE: armT.setTargetPosition(450); defineClipUpServoPoses(hardwareMap); servoPoseFollower.start(); break;
 //            case CLIP_RELEASE_POSE: defineClipReleaseServoPoses(hardwareMap); servoPoseFollower.start(); break;
@@ -315,7 +369,8 @@
 //
 //    private void definePutServoPoses(HardwareMap hardwareMap) {
 //        List<ServoPose> putPoses = Arrays.asList(
-//                new ServoPose(0.35, 0.35, 0.85, 0.5, 0.4,300)
+//                new ServoPose(0.35, 0.65, 0.85, 1, 0.4,300),
+//                new ServoPose(0.35, 0.35, 0.85, 1, 0, 500)
 //        );
 //        servoPoseFollower = new ServoPoseFollower(hardwareMap, putPoses);
 //    }
