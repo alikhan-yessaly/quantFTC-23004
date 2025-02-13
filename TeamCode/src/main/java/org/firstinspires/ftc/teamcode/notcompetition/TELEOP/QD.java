@@ -32,13 +32,14 @@ public class QD extends LinearOpMode{
    public static double wristBPos = 0;
    public static int armTDownPos = 0, armTClipPos = 4000, armTHighBasketPos = 3000;
    public static double armT_Kd = 0.00001, armT_Kp = 0.001, armT_Ki = 0.001;
-   public static double extender_Kd = 0.00001, extender_Kp = 0.0005, extender_Ki = 0.0005;
+//   public static double extender_Kd = 0.00001, extender_Kp = 0.0005, extender_Ki = 0.0005;
+   public static double extender_Kd = 0.00001, extender_Kp = 0.002, extender_Ki = 0.005;
    public static double lift_kD = 0.0001, lift_kP = 0.001;
    public static double heading_Kp = 0.04, heading_kD = 0.002, heading_kI = 0;
    //at kP = 0.0004, kD = 0.00035, kI = 0 at 12.5V battery
     //at kP = 0.04 , kD = 0.002, kI = 0 at 13.4V battery
-
-   public static double extenderSpeed = 3000;
+//   public static double extenderSpeed = 3000;
+   public static double extenderSpeed = 1000;
 
    public static double turnSpeed = 180;
 
@@ -549,7 +550,7 @@ public class QD extends LinearOpMode{
                        armTargetPos = 0;
                        wristBServo.setPosition(0.85);
                        wristTServo.setPosition(0.2);
-                       clawBServo.setPosition(0.35);
+                       clawBServo.setPosition(0.65);
                        clawTServo.setPosition(0.35);
                        extenderTargetPos = 0;
 
