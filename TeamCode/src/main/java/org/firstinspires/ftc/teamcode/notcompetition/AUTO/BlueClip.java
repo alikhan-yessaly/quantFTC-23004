@@ -19,13 +19,13 @@ import java.util.Arrays;
 import java.util.List;
 
 
-@Autonomous(name = "BlueClip", group = "Autonomous")
+@Autonomous(name = "Blue5Clip", group = "Autonomous")
 public class BlueClip extends OpMode{
 
     private enum AutoState {
         FIRST_PATH,CLIP1,
         SECOND1_PATH,SECOND2_PATH,SECOND3_PATH,CLIP2_TAKE,THIRD_PATH, CLIP2,
-        FOURTH1_PATH,FOURTH2_PATH,FOURTH3_PATH,CLIP3_TAKE,FIFTH_PATH, CLIP3,
+        FOURTH1_PATH,FOURTH2_PATH,FOURTH3_PATH,FOURTH4_PATH,FOURTH5_PATH,CLIP3_TAKE,FIFTH_PATH, CLIP3,
         SIX1_PATH, SIX2_PATH, SIX3_PATH, CLIP4_TAKE, SEVENTH_PATH,CLIP4,
         EIGHT_PATH, CLIP5_TAKE, NINTH_PATH, CLIP5, PARK_PATH,
         COMPLETE;
@@ -35,7 +35,7 @@ public class BlueClip extends OpMode{
     private Follower follower;
     private ServoPoseFollower servoPoseFollower;
     private PathChain firstPath, second1Path,second2Path,second3Path,
-            thirdPath,fourth1Path,fourth2Path,fourth3Path, fifthPath,
+            thirdPath,fourth1Path,fourth2Path,fourth3Path, fourth4Path,fourth5Path,fifthPath,
             six1Path, six2Path, six3Path, seventhPath, eightPath, ninePath, parkPath;
 
     private static final Pose START_POSE = new Pose(8.50, 58.00, Math.toRadians(180));
@@ -60,6 +60,8 @@ public class BlueClip extends OpMode{
         fourth1Path = buildFourth1Path();
         fourth2Path = buildFourth2Path();
         fourth3Path = buildFourth3Path();
+        fourth4Path = buildFourth4Path();
+        fourth5Path = buildFourth5Path();
         fifthPath = buildFifthPath();
         six1Path = build61Path();
         six2Path = build62Path();
@@ -111,6 +113,12 @@ public class BlueClip extends OpMode{
                 if(follower.isCloseEnoughToEnd()) setState(AutoState.FOURTH3_PATH);
                 break;
             case FOURTH3_PATH:
+                if(follower.isCloseEnoughToEnd()) setState(AutoState.FOURTH4_PATH);
+                break;
+            case FOURTH4_PATH:
+                if(follower.isCloseEnoughToEnd()) setState(AutoState.FOURTH5_PATH);
+                break;
+            case FOURTH5_PATH:
                 if(follower.isCloseEnoughToEnd()) setState(AutoState.CLIP3_TAKE);
                 break;
             case CLIP3_TAKE:
@@ -141,7 +149,7 @@ public class BlueClip extends OpMode{
                 if(servoPoseFollower.isComplete()) setState(AutoState.EIGHT_PATH);
                 break;
             case EIGHT_PATH:
-                if(follower.isCloseEnoughToEnd() && opmodeTimer.getElapsedTime()>1000) setState(AutoState.CLIP5_TAKE);
+                if(follower.isCloseEnoughToEnd() && opmodeTimer.getElapsedTime()>1500) setState(AutoState.CLIP5_TAKE);
                 break;
             case CLIP5_TAKE:
                 if(servoPoseFollower.isComplete()) setState(AutoState.NINTH_PATH);
@@ -190,6 +198,8 @@ public class BlueClip extends OpMode{
             case FOURTH1_PATH: follower.followPath(fourth1Path); defineClipPrepareServoPoses(hardwareMap);break;
             case FOURTH2_PATH: follower.followPath(fourth2Path);defineClipPrepareServoPoses(hardwareMap);break;
             case FOURTH3_PATH: follower.followPath(fourth3Path);defineClipPrepareServoPoses(hardwareMap);break;
+            case FOURTH4_PATH: follower.followPath(fourth4Path);defineClipPrepareServoPoses(hardwareMap);break;
+            case FOURTH5_PATH: follower.followPath(fourth5Path);defineClipPrepareServoPoses(hardwareMap);break;
             case CLIP3_TAKE: defineClipTakeServoPoses(hardwareMap); break;
             case FIFTH_PATH: follower.followPath(fifthPath); defineFirstServoPoses(hardwareMap);break;
             case CLIP3: defineClipSetServoPoses(hardwareMap); break;
@@ -285,9 +295,9 @@ public class BlueClip extends OpMode{
                         // Line 4.1
                         new BezierCurve(
                                 new Point(39.200, 74.000, Point.CARTESIAN),
-                                new Point(26.000, 42.000, Point.CARTESIAN),
+                                new Point(23.486, 24.435, Point.CARTESIAN),
                                 new Point(36.059, 33.687, Point.CARTESIAN),
-                                new Point(61.680, 16.132, Point.CARTESIAN)
+                                new Point(73.542, 25.621, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -298,8 +308,8 @@ public class BlueClip extends OpMode{
                 .addPath(
                         // Line 4.2
                         new BezierLine(
-                                new Point(61.680, 16.132, Point.CARTESIAN),
-                                new Point(24.198, 11.150, Point.CARTESIAN)
+                                new Point(73.542, 25.621, Point.CARTESIAN),
+                                new Point(53.614, 17.555, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -310,11 +320,34 @@ public class BlueClip extends OpMode{
                 .addPath(
                         // Line 4.3
                         new BezierLine(
-                                new Point(24.198, 11.150, Point.CARTESIAN),
+                                new Point(53.614, 17.555, Point.CARTESIAN),
+                                new Point(15.183, 16.369, Point.CARTESIAN)
+                        )
+
+                ).setConstantHeadingInterpolation(Math.toRadians(180))
+
+                .build();
+    }
+    private PathChain buildFourth4Path(){
+        return follower.pathBuilder()
+                .addPath(
+                // Line 4.4
+                        new BezierLine(
+                                new Point(15.183, 16.369, Point.CARTESIAN),
+                                new Point(17.318, 23.723, Point.CARTESIAN)
+                        )
+                ).setConstantHeadingInterpolation(Math.toRadians(180))
+                .build();
+    }
+    private PathChain buildFourth5Path(){
+        return follower.pathBuilder()
+                .addPath(
+                // Line 4.5
+                        new BezierLine(
+                                new Point(17.318, 23.723, Point.CARTESIAN),
                                 new Point(8.700, 24.000, Point.CARTESIAN)
                         )
-                )
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                ).setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
     }
     private PathChain buildFifthPath() {
@@ -375,7 +408,7 @@ public class BlueClip extends OpMode{
                         // Line 7
                         new BezierLine(
                                 new Point(8.700, 24.000, Point.CARTESIAN),
-                                new Point(39.200, 70.000, Point.CARTESIAN)
+                                new Point(39.200, 71.000, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180))
@@ -387,7 +420,7 @@ public class BlueClip extends OpMode{
                 .addPath(
                 // Line 8
                     new BezierLine(
-                            new Point(39.200, 70.000, Point.CARTESIAN),
+                            new Point(39.200, 71.000, Point.CARTESIAN),
                             new Point(8.700, 24.000, Point.CARTESIAN)
                     )
                 ).setConstantHeadingInterpolation(Math.toRadians(180))
