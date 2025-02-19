@@ -24,14 +24,14 @@ public class FollowerConstants {
 
     // This section is for configuring your motors
     public static String leftFrontMotorName = "leftFront";
-    public static String leftRearMotorName = "leftBack";
+    public static String leftRearMotorName = "leftRear";
     public static String rightFrontMotorName = "rightFront";
-    public static String rightRearMotorName = "rightBack";
+    public static String rightRearMotorName = "rightRear";
 
     // This section is for setting the actual drive vector for the front left wheel, if the robot
     // is facing a heading of 0 radians with the wheel centered at (0,0)
-    private static double xMovement = 64.3;
-    private static double yMovement = 52.84;
+    private static double xMovement = 63.45734628162154;
+    private static double yMovement = 51.32530546986038;
     private static double[] convertToPolar = Point.cartesianToPolar(xMovement, -yMovement);
     public static Vector frontLeftVector = MathFunctions.normalizeVector(new Vector(convertToPolar[0], convertToPolar[1]));
 
@@ -91,11 +91,11 @@ public class FollowerConstants {
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
-    public static double forwardZeroPowerAcceleration = -27.96;
+    public static double forwardZeroPowerAcceleration = -26.10318803436173;
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
-    public static double lateralZeroPowerAcceleration = -55.0;
+    public static double lateralZeroPowerAcceleration = -58.68002122234557;
 
     // A multiplier for the zero power acceleration to change the speed the robot decelerates at
     // the end of paths.
@@ -104,18 +104,20 @@ public class FollowerConstants {
     // Decreasing this will cause the deceleration at the end of the Path to be slower, making the
     // robot slower but reducing risk of end-of-path overshoots or localization slippage.
     // This can be set individually for each Path, but this is the default.
-    public static double zeroPowerAccelerationMultiplier = 3;
+    public static double zeroPowerAccelerationMultipфёlier = 4;
 
 
     // When the robot is at the end of its current Path or PathChain and the velocity goes below
     // this value, then end the Path. This is in inches/second.
     // This can be custom set for each Path.
-    public static double pathEndVelocityConstraint = 0.1;
+//    public static double pathEndVelocityConstraint = 0.1;
+    public static double pathEndVelocityConstraint = 0.2;
 
     // When the robot is at the end of its current Path or PathChain and the translational error
     // goes below this value, then end the Path. This is in inches.
     // This can be custom set for each Path.
-    public static double pathEndTranslationalConstraint = 0.1;
+//    public static double pathEndTranslationalConstraint = 0.1;
+    public static double pathEndTranslationalConstraint = 0.2;
 
     // When the robot is at the end of its current Path or PathChain and the heading error goes
     // below this value, then end the Path. This is in radians.
@@ -144,7 +146,7 @@ public class FollowerConstants {
     // This is the number of times the velocity is recorded for averaging when approximating a first
     // and second derivative for on the fly centripetal correction. The velocity is calculated using
     // half of this number of samples, and the acceleration uses all of this number of samples.
-    public static int AVERAGED_VELOCITY_SAMPLE_NUMBER = 8;
+    public static int AVERAGED_VELOCITY_SAMPLE_NUMBER = 10;
 
     // This is the number of steps the binary search for closest point uses. More steps is more
     // accuracy, and this increases at an exponential rate. However, more steps also does take more

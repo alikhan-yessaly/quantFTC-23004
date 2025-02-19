@@ -47,8 +47,8 @@ public class QD extends LinearOpMode{
 
    @Override
    public void runOpMode() throws InterruptedException{
-       Motor backLeftMotor = new Motor(hardwareMap, "leftBack");
-       Motor backRightMotor = new Motor(hardwareMap, "rightBack");
+       Motor backLeftMotor = new Motor(hardwareMap, "leftRear");
+       Motor backRightMotor = new Motor(hardwareMap, "rightRear");
        Motor frontLeftMotor = new Motor(hardwareMap, "leftFront");
        Motor frontRightMotor = new Motor(hardwareMap, "rightFront");
        Motor lift1 = new Motor(hardwareMap, "lift1");
@@ -185,8 +185,12 @@ public class QD extends LinearOpMode{
 //           turnPower *= (12/ batteryVoltage);
 
 
-           drive.driveRobotCentric(strafeInput,forwardInput,turnPower);
-//           drive.driveFieldCentric(strafeInput, forwardInput, turnPower, currentHeading);
+//           drive.driveRobotCentric(strafeInput,forwardInput,turnPower);
+           drive.driveFieldCentric(strafeInput, forwardInput, turnPower, currentHeading);
+
+           telemetry.addData("Strafe input", strafeInput);
+           telemetry.addData("forwardInput", forwardInput);
+           telemetry.addData("Turn Power", turnPower);
            //============================================ lift code ==================================================
 
            double liftInput = 0;
@@ -413,7 +417,7 @@ public class QD extends LinearOpMode{
                    }
 
                    // If enough time has passed (200ms), close the claw
-                   if (delayFlag && (clawBTimer.milliseconds() >= 200)) {
+                   if (delayFlag && (clawBTimer.milliseconds() > 100)) {
                        clawBServo.setPosition(0.7);  // Close the claw
                        delayFlag = false;  // Reset the flag after the action
                        armBPosition = 0.4;

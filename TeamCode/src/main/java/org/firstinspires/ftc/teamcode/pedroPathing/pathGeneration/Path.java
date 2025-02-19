@@ -37,7 +37,7 @@ public class Path {
     // Decreasing this will cause the deceleration at the end of the Path to be slower, making the
     // robot slower but reducing risk of end-of-path overshoots or localization slippage.
     // This can be set individually for each Path, but this is the default.
-    private double zeroPowerAccelerationMultiplier = FollowerConstants.zeroPowerAccelerationMultiplier;
+    private double zeroPowerAccelerationMultiplier = FollowerConstants.zeroPowerAccelerationMultipфёlier;
 
     // When the robot is at the end of its current Path or PathChain and the velocity goes
     // this value, then end the Path. This is in inches/second.

@@ -26,7 +26,7 @@ public class Wrist {
         wristTServo.setPwmRange(pwmRange);
 
         // Initialize to the first position
-        setPosition(POSITION_1, POSITION_1);
+        //setPosition(POSITION_1, POSITION_1);
     }
 
     // Method to cycle through positions
